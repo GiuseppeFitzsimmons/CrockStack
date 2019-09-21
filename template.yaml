@@ -1,0 +1,259 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Get advice from the dumbest man in the world
+
+Parameters:
+  DomainNameString:
+    Description: The domain name
+    Type: String
+    Default: whatwoulddododo.com
+Globals:
+  Function:
+    Timeout: 18
+    Runtime: nodejs8.10
+    Handler: index.handler
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      BucketName: wwdd.bucket
+      WebsiteConfiguration:
+        ErrorDocument: '404.htm'
+        IndexDocument: 'index.html'
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            MaxAge: '300'
+            AllowedMethods:
+              - POST
+            AllowedOrigins:
+              - '*'
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    DependsOn:
+      - S3Bucket
+    Properties:
+      Bucket: !Ref S3Bucket
+      PolicyDocument:
+        Statement:
+          - Sid: 'PublicReadForS3Website'
+            Action:
+              - 's3:GetObject'
+              - 's3:PutObject'
+            Effect: 'Allow'
+            Resource: !Ref S3Bucket
+            Principal: '*'
+  DomainCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref DomainNameString
+      SubjectAlternativeNames:
+      - !Ref DomainNameString
+      - !Sub ask.${DomainNameString}
+      - !Sub api.${DomainNameString}
+      DomainValidationOptions:
+      - DomainName: !Sub api.${DomainNameString}
+        ValidationDomain: !Ref DomainNameString
+      - DomainName: !Sub ask.${DomainNameString}
+        ValidationDomain: !Ref DomainNameString
+  #DomainName:
+  #  Type: 'AWS::ApiGateway::DomainName'
+  #  Properties:
+  #    DomainName: !Ref DomainNameString
+  #    CertificateArn: !Ref DomainCertificate
+ 
+  WebsiteDNSName:
+    Type: AWS::Route53::RecordSet
+    DependsOn:
+      - WebsiteCloudfront
+    Properties:
+      HostedZoneName: !Sub ${DomainNameString}.
+      Name: !Ref DomainNameString
+      Type: A
+      AliasTarget:
+        EvaluateTargetHealth: false
+        HostedZoneId: Z2FDTNDATAQYW2
+        DNSName: !GetAtt WebsiteCloudfront.DomainName
+  WebsiteCloudfront:
+    Type: AWS::CloudFront::Distribution
+    DependsOn:
+      - S3Bucket
+    Properties:
+      DistributionConfig:
+        Comment: Cloudfront Distribution pointing to S3 bucket
+        Origins:
+          - Id: S3Origin
+            OriginPath: /askdonald
+            DomainName: !Select [2, !Split ['/', !GetAtt S3Bucket.WebsiteURL]]
+            CustomOriginConfig:
+              HTTPPort: '80'
+              HTTPSPort: '443'
+              OriginProtocolPolicy: http-only
+          - Id: WwddLambdaOrigin
+            OriginPath: /Stage
+            DomainName: !Sub ${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com
+            CustomOriginConfig:
+              HTTPPort: '80'
+              HTTPSPort: '443'
+              OriginProtocolPolicy: https-only
+        Enabled: true
+        HttpVersion: 'http2'
+        DefaultRootObject: ''
+        Aliases:
+          - !Ref DomainNameString
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+            - PUT
+            - POST
+            - PATCH
+            - DELETE
+          Compress: true
+          TargetOriginId: S3Origin
+          ForwardedValues:
+            QueryString: true
+            Cookies:
+              Forward: all
+          ViewerProtocolPolicy: allow-all
+          MinTTL: '0'
+          MaxTTL: '0'
+          DefaultTTL: '0'
+        CacheBehaviors:
+          - AllowedMethods:
+              - DELETE
+              - GET
+              - HEAD
+              - OPTIONS
+              - PATCH
+              - POST
+              - PUT
+            TargetOriginId: S3Origin
+            ForwardedValues:
+              QueryString: 'true'
+              Cookies:
+                Forward: all
+            ViewerProtocolPolicy: allow-all
+            MinTTL: '0'
+            MaxTTL: '0'
+            DefaultTTL: '0'
+            PathPattern: index.*
+          - AllowedMethods:
+              - DELETE
+              - GET
+              - HEAD
+              - OPTIONS
+              - PATCH
+              - POST
+              - PUT
+            TargetOriginId: WwddLambdaOrigin
+            ForwardedValues:
+              QueryString: 'true'
+              Cookies:
+                Forward: all
+            ViewerProtocolPolicy: https-only
+            MinTTL: '0'
+            MaxTTL: '0'
+            DefaultTTL: '0'
+            PathPattern: /askdonald
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+          AcmCertificateArn: !Ref DomainCertificate
+          SslSupportMethod: sni-only
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        !Join [
+          '-',
+          [
+            !Ref 'AWS::StackName',
+            'LambdaExecutionRole'
+          ],
+        ]
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+                - apigateway.amazonaws.com
+                - events.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName:
+            Fn::Join:
+              - '-'
+              - - !Ref AWS::StackName
+                - WriteLogPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: 'arn:aws:logs:*:*:log-group:/aws/lambda/*:*:*'
+        - PolicyName:
+            Fn::Join:
+              - '-'
+              - - !Ref AWS::StackName
+                - InvokeTokenLambda
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: '*'
+        - PolicyName:
+            Fn::Join:
+              - '-'
+              - - !Ref AWS::StackName
+                - Iam
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: 'iam:GetRolePolicy'
+                Resource: '*'
+        - PolicyName:
+            Fn::Join:
+              - '-'
+              - - !Ref AWS::StackName
+                - comprehend
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: 'comprehend:DetectKeyPhrases'
+                Resource: '*'
+
+  WwddLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: askdonald/
+      Runtime: nodejs8.10
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        ApiEventSource:
+          Type: Api
+          Properties:
+            Path: /askdonald
+            Method: post
+        ApiEventSource2:
+          Type: Api
+          Properties:
+            Path: /askdonald
+            Method: get
+Outputs:
+  WebsiteUrl : 
+      Description : Click here
+      Value:  !Ref DomainNameString

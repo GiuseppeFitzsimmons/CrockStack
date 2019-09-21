@@ -1,0 +1,881 @@
+{
+    "quotes": [
+        {
+            "quote": "I have a great relationship with the blacks.",
+            "mood": 1,
+            "categories": [
+                "RACE"
+            ]
+        },
+        {
+            "quote": "I will build a great wall--and nobody builds walls better than me, believe me--and I'll build them very inexpensively. I will build a great, great wall on our southern border, and I will make Mexico pay for that wall. Mark my words.",
+            "mood": 1,
+            "categories": [
+                "WALL",
+                "IMMIGRATION"
+            ]
+        },
+        {
+            "quote": "The beauty of me is that I'm very rich",
+            "mood": 1,
+            "categories": [
+                "EGO"
+            ]
+        },
+        {
+            "quote": "It's freezing and snowing in New York--we need global warming!",
+            "mood": 1,
+            "categories": [
+                "ENVIRONMENT"
+            ]
+        },
+        {
+            "quote": "Grab them by the pussy.",
+            "mood": 1,
+            "categories": [
+                "WOMEN"
+            ]
+        },
+        {
+            "quote": "I would give myself an A+",
+            "mood": 1,
+            "categories": [
+                "EGO"
+            ]
+        },
+        {
+            "quote": "No smocking gun, no collusion.",
+            "mood": -1,
+            "categories": [
+                "SALAD",
+                "RUSSIA"
+            ]
+        },
+        {
+            "quote": "I would certainly implement that. Absolutely... There should be a lot of systems, beyond databases. We should have a lot of systems... They have to be. They have to be... It's all about management.",
+            "mood": 0,
+            "categories": [
+                "SALAD"
+            ]
+        },
+        {
+            "quote": "I would knock the hell out of ISIS. I would hit them ... so hard like they've never been hit before.",
+            "mood": -1,
+            "categories": [
+                "MILITARY",
+                "MIDDLE_EAST"
+            ]
+        },
+        {
+            "quote": "Well, I'm never gonna rule anything out. And I wouldn't wanna say. Even if I felt -- it wasn't going -- I wouldn't wanna tell you that because, at a minimum, I want them to think maybe that we would",
+            "mood": 0,
+            "categories": [
+                "SALAD",
+                "TRADE",
+                "MILITARY"
+            ]
+        },
+        {
+            "quote": "Let’s fucking kill him! Let’s go in. Let’s kill the fucking lot of them.",
+            "mood": -1,
+            "categories": [
+                "MILITARY"
+            ]
+        },
+        {
+            "quote": "I'm a great believer in asking everyone for an opinion before I make a decision.",
+            "mood": 0,
+            "categories": [
+                "EGO"
+            ]
+        },
+        {
+            "quote": "But you look at the nuclear deal, the thing that really bothers me—it would have been so easy, and it’s not as important as these lives are (nuclear is powerful; my uncle explained that to me many, many years ago, the power and that was 35 years ago; he would explain the power of what's going to happen and he was right—who would have thought?), but when you look at what's going on with the four prisoners—now it used to be three, now it’s four—but when it was three and even now, I would have said it's all in the messenger; fellas, and it is fellas because, you know, they don't, they haven’t figured that the women are smarter right now than the men, so, you know, it’s gonna take them about another 150 years—but the Persians are great negotiators, the Iranians are great negotiators, so, and they, they just killed, they just killed us.",
+            "mood": 0,
+            "categories": [
+                "SALAD",
+                "TRADE"
+            ]
+        },
+        {
+            "quote": "A lot of people are saying that and a lot of people are saying that bad things are happening out there. We're going to be looking at that and a lot of different things.",
+            "mood": 0,
+            "categories": [
+                "SALAD"
+            ]
+        },
+        {
+            "quote": "I would certainly implement that. Absolutely... There should be a lot of systems, beyond databases. We should have a lot of systems... They have to be. They have to be... It's all about management.",
+            "mood": 0,
+            "categories": [
+                "SALAD"
+            ]
+        },
+        {
+            "quote": "We have to do something. We have to go see Bill Gates and a lot of different people that really understand what’s happening. We have to talk to them, maybe in certain areas, closing that Internet up in some way. Some people will say, ‘Freedom of speech, Freedom of speech’. These are foolish people.",
+            "mood": -1,
+            "categories": [
+                "SALAD",
+                "TRADE"
+            ]
+        },
+        {
+            "quote": "I will be phenomenal to the women. I mean, I want to help women.",
+            "mood": 1,
+            "categories": [
+                "WOMEN",
+                "EGO"
+            ]
+        },
+        {
+            "quote": "I have read a lot about it and I watched it and Liberty University, like a rocket ship, a really great rocket ship.",
+            "mood": 1,
+            "categories": [
+                "SALAD",
+                "MILITARY"
+            ]
+        },
+        {
+            "quote": "Look, having nuclear — my uncle was a great professor and scientist and engineer, Dr. John Trump at MIT; good genes, very good genes, OK, very smart, the Wharton School of Finance, very good, very smart — you know, if you’re a conservative Republican, if I were a liberal, if, like, OK, if I ran as a liberal Democrat, they would say I’m one of the smartest people anywhere in the world — it’s true!",
+            "mood": 0,
+            "categories": [
+                "SALAD",
+                "EGO",
+                "MILITARY"
+            ]
+        },
+        {
+            "quote": "Remember two things. Number one, I said, we're going to be saying Christmas again. And, number two, I said I was going to give you a Christmas present.",
+            "mood": 1,
+            "categories": [
+                "RELIGION",
+                "EGO"
+            ]
+        },
+        {
+            "quote": "We're going to win at space.",
+            "mood": 1,
+            "categories": [
+                "MILITARY"
+            ]
+        },
+        {
+            "quote": "We love winners. We love winners. Winners are winners.",
+            "mood": 1,
+            "categories": [
+                "SALAD",
+                "EGO"
+            ]
+        },
+        {
+            "quote": "Sorry losers and haters, but my IQ is one of the highest - and you all know it! Please don't feel so stupid or insecure, it's not your fault.",
+            "mood": 1,
+            "categories": [
+                "EGO"
+            ]
+        },
+        {
+            "quote": "I'm intelligent. Some people would say I'm very, very, very intelligent.",
+            "mood": 1,
+            "categories": [
+                "EGO"
+            ]
+        },
+        {
+            "quote": "In life you have to rely on the past, and that’s called history.",
+            "mood": 0,
+            "categories": [
+                "SALAD"
+            ]
+        },
+        {
+            "quote": "I’ve said if Ivanka weren’t my daughter, perhaps I’d be dating her.",
+            "mood": 1,
+            "categories": [
+                "WOMEN",
+                "EGO"
+            ]
+        },
+        {
+            "quote": "The point is, you can never be too greedy.",
+            "mood": 0,
+            "categories": [
+                "SALAD",
+                "EGO"
+            ]
+        },
+        {
+            "quote": "I think I am actually humble. I think I’m much more humble than you would understand.",
+            "mood": 1,
+            "categories": [
+                "EGO"
+            ]
+        },
+        {
+            "quote": "I know more about ISIS than the generals do. Believe me.",
+            "mood": 0,
+            "categories": [
+                "MIDDLE_EAST",
+                "EGO"
+            ]
+        },
+        {
+            "quote": "Eventually we’re going to get something done and it’s going to be really, really good.",
+            "mood": 1,
+            "categories": [
+                "SALAD",
+                "EGO"
+            ]
+        },
+        {
+            "quote": "I went to the Wharton School of Business. I’m like, a really smart person.",
+            "mood": 0,
+            "categories": [
+                "EGO"
+            ]
+        },
+        {
+            "quote": "It has not been easy for me. And, you know, I started off in Brooklyn. My father gave me a small loan of a million dollars.",
+            "mood": 0,
+            "categories": [
+                "EGO"
+            ]
+        },
+        {
+            "quote": "The concept of global warming was created by and for the Chinese in order to make U.S. manufacting non-competitive.",
+            "mood": -1,
+            "categories": [
+                "TRADE",
+                "ENVIRONMENT"
+            ]
+        },
+        {
+            "quote": "I will absolutely apologize sometime hopefully in the distant future if I’m ever wrong.",
+            "mood": 0,
+            "categories": [
+                "SALAD",
+                "EGO"
+            ]
+        },
+        {
+            "quote": "I think I am actually humble. I think I’m much more humble than you would understand.",
+            "mood": 0,
+            "categories": [
+                "SALAD",
+                "EGO"
+            ]
+        },
+        {
+            "quote": "This is an island surrounded by water, big water, ocean water.",
+            "mood": 0,
+            "categories": [
+                "SALAD"
+            ]
+        },
+        {
+            "quote": "The worst thing a man can do is go bald. Never let yourself go bald.",
+            "mood": 0,
+            "categories": [
+                "SALAD",
+                "EGO"
+            ]
+        },
+        {
+            "quote": "I am the least racist person in the world.",
+            "mood": -1,
+            "categories": [
+                "RACE",
+                "EGO"
+            ]
+        },
+        {
+            "quote": "My wife says I'm the biggest star in the world. But she might just be saying that because she's intelligent.",
+            "mood": 1,
+            "categories": [
+                "SALAD",
+                "WOMEN"
+            ]
+        },
+        {
+            "quote": "An 'extremely credible source' has called my office and told me that @BarackObama's birth certificate is a fraud.",
+            "mood": -1,
+            "categories": [
+                "OBAMA"
+            ]
+        },
+        {
+            "quote": "And a term that, you know, I'm very proud of somebody said which is the best of the names, I don't know, maybe fake news. Who knows what it is.",
+            "mood": 0,
+            "categories": [
+                "SALAD"
+            ]
+        },
+        {
+            "quote": "But it is tough, but we’re going to take care of that too. That’s going to get taken care of. We’ve already taken care of a lot of it. But the whole — my life I’ve always heard the deal between, as you know, Israel and the Palestinians, that’s like the toughest deal.",
+            "mood": 0,
+            "categories": [
+                "SALAD"
+            ]
+        },
+        {
+            "quote": "A lot of the wall was, you know, I'm good at this stuff.",
+            "mood": 0,
+            "categories": [
+                "IMMIGRATION",
+                "SALAD"
+            ]
+        },
+        {
+            "quote": "Yeah, China. … China’s been. … I like very much President Xi. He treated me better than anybody’s ever been treated in the history of China.",
+            "mood": 1,
+            "categories": [
+                "TRADE"
+            ]
+        },
+        {
+            "quote": "I have a number favorite authors. I think Tom Wolfe is excellent.",
+            "mood": 0,
+            "categories": [
+                "READING"
+            ]
+        },
+        {
+            "quote": "I'm reading my own book again because I think it’s so fantastic.",
+            "mood": 0,
+            "categories": [
+                "READING"
+            ]
+        },
+        {
+            "quote": "I like a lot of books. I like reading books. I don’t have time to read very much now in terms of the books, but I like reading them.",
+            "mood": 0,
+            "categories": [
+                "READING"
+            ]
+        },
+        {
+            "quote": "I’m not going to have time to go golfing, believe me. Believe me. Believe me, folks.",
+            "mood": -1,
+            "categories": [
+                "EGO",
+                "GOLF"
+            ]
+        },
+        {
+            "quote": "I’m not going to have time to go golfing, believe me. Believe me. Believe me, folks.",
+            "mood": -1,
+            "categories": [
+                "EGO",
+                "GOLF"
+            ]
+        },
+        {
+            "quote": "Nobody really knows what a community college is.",
+            "mood": 0,
+            "categories": [
+                "EDUCATION"
+            ]
+        },
+        {
+            "quote": "I know more about drones than anybody. I know about every form of safety that you can have.",
+            "mood": 0,
+            "categories": [
+                "MILITARY"
+            ]
+        },
+        {
+            "quote": "I know more about ISIS than the generals do.",
+            "mood": 0,
+            "categories": [
+                "MILITARY"
+            ]
+        },
+        {
+            "quote": "I know more about courts than any human being on Earth.",
+            "mood": 0,
+            "categories": [
+                "POLITICS"
+            ]
+        },
+        {
+            "quote": "I understand politicians better than anybody.",
+            "mood": 0,
+            "categories": [
+                "POLITICS"
+            ]
+        },
+        {
+            "quote": "Nobody knows more about trade than me.",
+            "mood": 0,
+            "categories": [
+                "TRADE","ECONOMY"
+            ]
+        },
+        {
+            "quote": "I know more about renewables than any human being on Earth.",
+            "mood": 0,
+            "categories": [
+                "ENVIRONMENT"
+            ]
+        },
+        {
+            "quote": "I think nobody knows more about taxes than I do, maybe in the history of the world",
+            "mood": 0,
+            "categories": [
+                "ECONOMY"
+            ]
+        },
+        {
+            "quote": "I’m the king of debt. I’m great with debt. Nobody knows debt better than me.",
+            "mood": 0,
+            "categories": [
+                "ECONOMY"
+            ]
+        },
+        {
+            "quote": "I understand money better than anybody.",
+            "mood": 0,
+            "categories": [
+                "ECONOMY"
+            ]
+        },
+        {
+            "quote": "Technology — nobody knows more about technology than me.",
+            "mood": 0,
+            "categories": [
+                "ECONOMY"
+            ]
+        },
+        {
+            "quote": "Having a drone fly overhead — and I think nobody knows much more about technology, this type of technology certainly, than I do.",
+            "mood": 0,
+            "categories": [
+                "MILITARY"
+            ]
+        },
+        {
+            "quote": "A big majority of the big drugs, the big drug loads don’t go through ports of entry. They can’t go through ports of entry. You can’t take big loads because you have people. We have some very capable people, the border patrol, law enforcement, looking",
+            "mood": 0,
+            "categories": [
+                "IMMIGRATION"
+            ]
+        },
+        {
+            "quote": "We’ve ended the war on beautiful, clean coal, and it’s just been announced that a second, brand-new coal mine where they’re going to take out clean coal.",
+            "mood": 0,
+            "categories": [
+                "ENVIRONMENT"
+            ]
+        },
+        {
+            "quote": "What you’re seeing and what you’re reading is not what’s happening.",
+            "mood": 0,
+            "categories": [
+                "POLITICS","SALAD"
+            ]
+        },
+        {
+            "quote": "I have a son. He’s 10 years old. He has computers. He is so good with these computers, it’s unbelievable. The security aspect of cyber is very, very tough. And maybe it’s hardly doable.",
+            "mood": 0,
+            "categories": [
+                "POLITICS","MILITARY"
+            ]
+        },
+        {
+            "quote": "Look, I'm just saying very simply we have a country that I've never seen anything like it.",
+            "mood": 0,
+            "categories": [
+                "POLITICS","SALAD"
+            ]
+        },
+        {
+            "quote": "We’re going to work with our doctors. We’ve got to do something. ... We’ll work something out ... Nobody knows health care better than Donald Trump.",
+            "mood": 0,
+            "categories": [
+                "HEALTHCARE"
+            ]
+        },
+        {
+            "quote": "We have to come up, and we can come up with many different plans. In fact, plans you don't even know about will be devised because we’re going to come up with plans—health care plans—that will be so good.",
+            "mood": 0,
+            "categories": [
+                "HEALTHCARE"
+            ]
+        },
+        {
+            "quote": "You’re going to have such great health care, at a tiny fraction of the cost—and it’s going to be so easy.",
+            "mood": 0,
+            "categories": [
+                "HEALTHCARE"
+            ]
+        },
+        {
+            "quote": "Here’s something where you walk up and say, 'I want my insurance.' It’s a very tough deal, but it is something that we’re doing a good job of. ",
+            "mood": 0,
+            "categories": [
+                "HEALTHCARE"
+            ]
+        },
+        {
+            "quote": "When you see what the Obama Administration, and perhaps longer than that, was doing, all of this unmasking and surveillance and you read all about it and I’ve been reading about it the last couple of months, about the seriousness of the and the horrible situation with surveillance all over the place.",
+            "mood": 0,
+            "categories": [
+                "SALAD","OBAMA"
+            ]
+        },
+        {
+            "quote": "I guess I'm looking very much at defense and we're negotiating a lot of contracts with airlines and a lot of other people, but when you get right down to it, the F-35 fighter is very important and all of the things we're doing are very important.",
+            "mood": 0,
+            "categories": [
+                "MILITARY"
+            ]
+        },
+        {
+            "quote": "I said how does it do it in fights, and how do they do in fights with the F-35. He says we do very well, you can't see it. Literally you can't see.",
+            "mood": 0,
+            "categories": [
+                "MILITARY"
+            ]
+        },
+        {
+            "quote": "You like the F-35? ... You can't see it. You literally can't see it. It's hard to fight a plane you can't see.",
+            "mood": 0,
+            "categories": [
+                "MILITARY"
+            ]
+        },
+        {
+            "quote": "So I’ll call, like, major—major countries, and I’ll be dealing with the prime minister or the president. And I’ll say, how are you doing?",
+            "mood": 0,
+            "categories": [
+                "POLITICS","TRADE","ECONOMY"
+            ]
+        },
+        {
+            "quote": "We can have a lot of fun tonight. I have nothing to do. Nothing. Nothing.",
+            "mood": 1,
+            "categories": [
+                "EGO","SALAD"
+            ]
+        },
+        {
+            "quote": "You remember last election, Donald Trump will never, ever get the women. Then we got this tremendous number of women.",
+            "mood": 1,
+            "categories": [
+                "WOMEN","POLITICS"
+            ]
+        },
+        {
+            "quote": "Nobody has been tougher with Russia than Donald Trump.",
+            "mood": 0,
+            "categories": [
+                "RUSSIA"
+            ]
+        },
+        {
+            "quote": "Promises made, promises kept. You know, I’ve actually kept more promises than I’ve made. When did you ever hear that from a politician? Maybe never. Never.",
+            "mood": 0,
+            "categories": [
+                "POLITIC","EGO"
+            ]
+        },
+        {
+            "quote": "Everybody calls me Mr. President. It's true. It's a funny thing.",
+            "mood": 1,
+            "categories": [
+                "POLITICS","EGO"
+            ]
+        },
+        {
+            "quote": "We are one movement, one movement. Think of that. We are one big, beautiful movement.",
+            "mood": 1,
+            "categories": [
+                "POLITICS"
+            ]
+        },
+        {
+            "quote": "I mean, look, it used to not be climate change, it used to be global warming. That wasn’t working too well because it was getting too cold all over the place.",
+            "mood": 0,
+            "categories": [
+                "ENVIRONMENT"
+            ]
+        },
+        {
+            "quote": "Here’s something where you walk up and say, “I want my insurance.” It’s a very tough deal, but it is something that we’re doing a good job of.",
+            "mood": 0,
+            "categories": [
+                "HEALTHCARE"
+            ]
+        },
+        {
+            "quote": "You know, we have a big problem with North Korea. Big. Big, big. You look at all of the things, you look at the line in the sand. The red line in the sand in Syria. He didn’t do the shot. I did the shot. Had he done that shot, he wouldn’t have had — had he done something dramatic, because if you remember, they had a tremendous gas attack after he made that statement. Much bigger than the one they had with me.",
+            "mood": 0,
+            "categories": [
+                "MILITARY","OBAMA"
+            ]
+        },
+        {
+            "quote": "This country has wasted $6trn in the Middle East. Wasted. Like taking it and throwing it right out that window. Right in to the Rose Garden. See that beautiful Rose Garden? Look at those very nicely dressed people. It’s religious liberty out there.",
+            "mood": 0,
+            "categories": [
+                "MILITARY","OBAMA","RELIGION","SALAD","MIDDLE_EAST"
+            ]
+        }
+                                                                                  
+        
+    ],
+    "categories": [
+        {
+            "name": "RACE",
+            "keywords": [
+                "black",
+                "mexican",
+                "immigrant",
+                "white"
+            ]
+        },
+        {
+            "name": "OBAMA",
+            "keywords": [
+                "obama",
+                "barack",
+                "michelle",
+                "birth",
+                "certificate",
+                "birther"
+            ]
+        },
+        {
+            "name": "POLITICS",
+            "keywords": [
+                "senate",
+                "mconnell",
+                "ryan",
+                "schumer",
+                "house",
+                "congress",
+                "white",
+                "power",
+                "election",
+                "cheat",
+                "vote",
+                "2020",
+                "republican",
+                "democrat",
+                "socialis",
+                "capitalis",
+                "campaign"
+            ]
+        },
+        {
+            "name": "READING",
+            "keywords": [
+                "book",
+                "author",
+                "reading",
+                "read",
+                "writer",
+                "art",
+                "literature"
+            ]
+        },
+        {
+            "name": "IMMIGRATION",
+            "keywords": [
+                "wall",
+                "mexican",
+                "immigration",
+                "immigrant",
+                "illegal"
+            ]
+        },
+        {
+            "name": "TRADE",
+            "keywords": [
+                "tariff",
+                "international",
+                "canada",
+                "foreign",
+                "china",
+                "deficit","mexico"
+            ]
+        },
+        {
+            "name": "EGO",
+            "keywords": [
+                "donald",
+                "trump",
+                "you",
+                "yourself",
+                "smart",
+                "stupid",
+                "hair",
+                "bald",
+                "hands",
+                "women",
+                "asshole",
+                "idiot",
+                "moron",
+                "dolt",
+                "liar"
+            ]
+        },
+        {
+            "name": "WOMEN",
+            "keywords" : [
+                "women",
+                "woman",
+                "girl",
+                "ivanka",
+                "ivana",
+                "daughter",
+                "wife",
+                "mistress",
+                "porn",
+                "star",
+                "blackmail"
+            ]
+        },
+        {
+            "name": "ENVIRONMENT",
+            "keywords": [
+                "environment",
+                "global",
+                "warming",
+                "freezing",
+                "pollution",
+                "clean",
+                "coal"
+            ]
+        },
+        {
+            "name": "MIDDLE_EAST",
+            "keywords": [
+                "isis",
+                "middle",
+                "east",
+                "israel",
+                "saudi",
+                "lybia",
+                "syria",
+                "terrorism",
+                "terror"
+            ]
+        },
+        {
+            "name": "MILITARY",
+            "keywords": [
+                "army",
+                "military",
+                "soldier",
+                "war",
+                "power",
+                "weapon",
+                "missile",
+                "drone",
+                "warfare",
+                "invade",
+                "bomb",
+                "fighter",
+                "navy",
+                "destroyer",
+                "general"
+            ]
+        },
+        {
+            "name": "RELIGION",
+            "keywords": [
+                "god",
+                "christianity",
+                "christmas",
+                "christ",
+                "muslim",
+                "islam",
+                "bible",
+                "corinthians",
+                "christian"
+            ]
+        },
+        {
+            "name": "RUSSIA",
+            "keywords": [
+                "russia",
+                "soviet",
+                "collusion",
+                "putin",
+                "spy",
+                "dossier",
+                "smoking",
+                "hack",
+                "hacking",
+                "facebook",
+                "conspiracy"
+            ]
+        },
+        {
+            "name": "GOLF",
+            "keywords": [
+                "mar-a-lago",
+                "lago",
+                "golf",
+                "links",
+                "holes",
+                "cheat",
+                "working",
+                "playing",
+                "lazy",
+                "obama",
+                "spare",
+                "time",
+                "vacation",
+                "relax"
+            ]
+        },
+        {
+            "name": "EDUCATION",
+            "keywords": [
+                "college",
+                "university",
+                "school",
+                "student",
+                "teacher",
+                "study",
+                "graduate",
+                "marks",
+                "tuition",
+                "education"
+            ]
+        },
+        {
+            "name": "ECONOMY",
+            "keywords": [
+                "jobs",
+                "economy",
+                "employment",
+                "stock",
+                "exchange",
+                "interest",
+                "rates",
+                "bank",
+                "financial",
+                "taxes"
+            ]
+        },
+        {
+            "name": "HEALTHCARE",
+            "keywords": [
+                "health",
+                "healthcare",
+                "obamacare",
+                "insurance",
+                "cancer",
+                "hospital",
+                "medicare",
+                "vetrans",
+                "operation",
+                "emergency",
+                "ambulance"
+            ]
+        }
+    ]
+}
