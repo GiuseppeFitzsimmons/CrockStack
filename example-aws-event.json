@@ -16,6 +16,6 @@
             "fish"
         ]
     },
-    "body": null,
+    "body": {"question":"What is wrong with you?"},
     "isBase64Encoded": false
 }
