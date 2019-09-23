@@ -6,7 +6,7 @@ const comprehend = new AWS.Comprehend({ apiVersion: '2017-11-27', region: 'us-ea
 require('fuzzyset.js');
 
 exports.handler = async (event, context) => {
-  console.log(event.queryStringParameters);
+  //console.log(event.queryStringParameters);
   var response = {
     statusCode: 200,
     headers: {
@@ -14,14 +14,18 @@ exports.handler = async (event, context) => {
       "Access-Control-Allow-Origin": "*"
     }
   };
-  if (!event.queryStringParameters || !event.queryStringParameters.question || event.queryStringParameters.question == '') {
+  question = event.queryStringParameters.question
+  if (!question){
+    question = event.body.question
+  }
+  if (!question) {
     response.statusCode = 400;
     response.body = JSON.stringify({ message: 'Question parameter is required' });
     return response;
   }
   try {
     //Await is used to wait while the promise executes
-    aiQuotes = await nlpQuote(event.queryStringParameters.question);
+    aiQuotes = await nlpQuote(question);
     //console.log(aiQuotes);
     adviceFromDonald = aiQuotes[Math.floor(Math.random() * aiQuotes.length)];
     //console.log(adviceFromDonald);
@@ -29,7 +33,7 @@ exports.handler = async (event, context) => {
       console.log("No ai matches, returning random quote");
     }
     response.body = JSON.stringify(adviceFromDonald);
-    console.log(response);
+    //console.log(response);
     return response;
   } catch (e) {
     response.statusCode = e.code;
@@ -121,7 +125,7 @@ async function nlpQuote(question) {
       })
     })
     if (!found) {
-      console.log(categories);
+      //console.log(categories);
       categories.forEach(function (category) {
         let categoryKeyWords = category.keywords
         category.rank = 0;
@@ -147,7 +151,7 @@ async function nlpQuote(question) {
       sortedCategories = categories.sort(function (a, b) {
         return b.rank - a.rank;
       })
-      console.log(sortedCategories[0]);
+      //console.log(sortedCategories[0]);
       if (sortedCategories[0].rank > 0) {
         quotes.forEach(function (quoteObject) {
           if (quoteObject.categories.includes(sortedCategories[0].name)) {

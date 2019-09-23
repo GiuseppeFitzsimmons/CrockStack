@@ -17,7 +17,7 @@ Resources:
   ApiGateway:
     Type: 'AWS::Serverless::Api'
     Properties:
-      Name: !Join ['-', [!Ref 'AWS::StackName', 'gateway']]
+      Name: "!Join ['-', [!Ref 'AWS::StackName', 'gateway']]"
       StageName: dev
   WwddLambda:
     Type: AWS::Serverless::Function
@@ -25,8 +25,8 @@ Resources:
       Handler: index.handler
       CodeUri: askdonald/
       Runtime: nodejs8.10
-      Role: !GetAtt LambdaExecutionRole.Arn
-      RestApiId: !Ref ApiGateway
+      Role: "!GetAtt LambdaExecutionRole.Arn"
+      RestApiId: "!Ref ApiGateway"
       Events:
         ApiEventSource:
           Type: Api
@@ -38,7 +38,21 @@ Resources:
           Properties:
             Path: /askdonald
             Method: get
+  HelloLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.requestHandler
+      CodeUri: hellolambda/
+      Runtime: nodejs8.10
+      Role: "!GetAtt LambdaExecutionRole.Arn"
+      RestApiId: "!Ref ApiGateway"
+      Events:
+        ApiEventSource:
+          Type: Api
+          Properties:
+            Path: /hello
+            Method: any
 Outputs:
   WebsiteUrl : 
       Description : Click here
-      Value:  !Ref DomainNameString
+      Value:  "!Ref DomainNameString"
