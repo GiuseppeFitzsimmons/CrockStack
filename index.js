@@ -2,6 +2,7 @@ const fs = require('fs')
 const yaml = require('js-yaml')
 const querystring = require('querystring')
 var http = require('http')
+var moduleAlias = require('module-alias')
 
 function startServer() {
     var answerFunction = async function (request, response) {
@@ -45,11 +46,17 @@ function startServer() {
             }
 
         }
-        console.log('event', event)
-        let input = fs.readFileSync('./template.yaml', 'utf8')
-        let stack = yaml.load(input)
+        let stack = loadTemplate()
         let lambda = getLambda(stack, event)
         if (lambda) {
+            if (lambda.Properties.Layers) {
+                for (var l in lambda.Properties.Layers) {
+                    let layerName = lambda.Properties.Layers[l]
+                    let layer = resolve(stack, layerName)
+                    console.log('./' + layer.Properties.ContentUri + 'nodejs')
+                    moduleAlias.addPath('./' + layer.Properties.ContentUri + 'nodejs')
+                }
+            }
             let lambdaFunction = require('./' + lambda.Properties.CodeUri)
             let handler = lambda.Properties.Handler
             if (handler.indexOf('.') > -1) {
@@ -76,13 +83,29 @@ function getLambda(stack, event) {
             for (var j in resource.Properties.Events) {
                 let resourceEvent = resource.Properties.Events[j]
                 if (resourceEvent.Type == 'Api'
-                && (resourceEvent.Properties.Method == event.httpMethod
-                    || resourceEvent.Properties.Method == 'any')
-                && resourceEvent.Properties.Path == event.path) {
+                    && (resourceEvent.Properties.Method == event.httpMethod
+                        || resourceEvent.Properties.Method == 'any')
+                    && resourceEvent.Properties.Path == event.path) {
                     return resource
                 }
             }
         }
     }
+}
+function loadTemplate() {
+    let input = fs.readFileSync('./template.yaml', 'utf8')
+    input = input.replace(new RegExp("\: \!(.*?)", "g"), ": _____");
+    input = input.replace(new RegExp("\: Fn\:\:(.*?)\:(.*?)", "g"), ": _____$1");
+    input = input.replace(new RegExp("\- \!(.*?)", "g"), "- _____");
+    input = input.replace(new RegExp("\- Fn\:\:(.*?)\:(.*?)", "g"), "- _____$1");
+    let stack = yaml.load(input)
+    return stack
+}
+function resolve(stack, reference) {
+    if (reference.indexOf('_____Ref ') > -1) {
+        reference = reference.substring(reference.indexOf('_____Ref ') + 9)
+    }
+    console.log('reference', reference)
+    return stack.Resources[reference]
 }
 startServer()
