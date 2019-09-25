@@ -21,6 +21,11 @@ Resources:
     Properties:
       Name: !Join ['-', [!Ref 'AWS::StackName', 'gateway']]
       StageName: dev
+      DefinitionBody:
+        Fn::Transform:
+          Name: 'AWS::Include'
+          Parameters:
+            Location: openapi.yaml
   WwddLambda:
     Type: AWS::Serverless::Function
     Properties:

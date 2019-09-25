@@ -6,13 +6,12 @@ var moduleAlias = require('module-alias')
 
 function startServer() {
     var templateName = 'template.yaml'
-    console.log('process.argv', process.argv)
     var _port = 8080
     for (var i in process.argv) {
         if (process.argv[i] == '--port') {
-            _port = process.argv[i*1+1]
-        } else if (process.argv[i] == '--template'){
-            templateName = process.argv[i*1+1]
+            _port = process.argv[i * 1 + 1]
+        } else if (process.argv[i] == '--template') {
+            templateName = process.argv[i * 1 + 1]
         }
     }
     var answerFunction = async function (request, response) {
@@ -62,15 +61,14 @@ function startServer() {
             if (layers) {
                 for (var l in layers) {
                     let layer = layers[l]
-                    moduleAlias.addPath(process.cwd()+'/' + layer.Properties.ContentUri + 'nodejs')
+                    moduleAlias.addPath(process.cwd() + '/' + layer.Properties.ContentUri + 'nodejs')
                 }
             }
-            let lambdaFunction = require(process.cwd()+'/' + lambda.Properties.CodeUri)
+            let lambdaFunction = require(process.cwd() + '/' + lambda.Properties.CodeUri)
             let handler = getHandlerforLambda(stack, lambda)
             let result = await lambdaFunction[handler](event)
             response.statusCode = result.statusCode
             response.write(result.body)
-            console.log('result', result)
         } else {
             response.statusCode = 401
             response.write(JSON.stringify({ message: 'Unauthorized' }))
@@ -123,12 +121,60 @@ function getLayersforLambda(stack, lambda) {
     }
 }
 function loadTemplate(templateName) {
-    let input = fs.readFileSync(process.cwd()+'/'+templateName, 'utf8')
+    let input = fs.readFileSync(process.cwd() + '/' + templateName, 'utf8')
+    input = input.replace(new RegExp("Fn\:\:Transform\:", "g"), "_____Transform\:");
+    input = input.replace(new RegExp("\!Transform", "g"), "_____Transform\:");
     input = input.replace(new RegExp("\: \!(.*?)", "g"), ": _____");
     input = input.replace(new RegExp("\: Fn\:\:(.*?)\:(.*?)", "g"), ": _____$1");
     input = input.replace(new RegExp("\- \!(.*?)", "g"), "- _____");
     input = input.replace(new RegExp("\- Fn\:\:(.*?)\:(.*?)", "g"), "- _____$1");
+    input = input.replace(new RegExp("Fn\:\:(.*?)\:", "g"), "- _____$1");
     let stack = yaml.load(input)
+    for (i in stack.Resources) {
+        var resource = stack.Resources[i]
+        if (resource.Type == 'AWS::Serverless::Api') {
+            if (resource.Properties.DefinitionBody) {
+                var paths = resource.Properties.DefinitionBody.Paths
+                if (!paths && resource.Properties.DefinitionBody._____Transform &&
+                    resource.Properties.DefinitionBody._____Transform.Parameters &&
+                    resource.Properties.DefinitionBody._____Transform.Parameters.Location) {
+                    swaggerString = fs.readFileSync(process.cwd() + '/' + resource.Properties.DefinitionBody._____Transform.Parameters.Location, 'utf8')
+                    paths = yaml.load(swaggerString)
+                }
+                if (paths) {
+                    for (_p in paths) {
+                        var pathObject = paths[_p]
+                        for (path in pathObject) {
+                            var methodObject = pathObject[path]
+                            for (method in methodObject) {
+                                var proxy = methodObject[method]
+                                if (proxy['x-amazon-apigateway-integration']) {
+                                    if (proxy['x-amazon-apigateway-integration'].type == 'aws_proxy') {
+                                        var lambdaName = proxy['x-amazon-apigateway-integration'].uri
+                                        lambdaName = JSON.stringify(lambdaName)
+                                        lambdaName = lambdaName.substring(lambdaName.indexOf('functions/${') + 12)
+                                        lambdaName = lambdaName.substring(0, lambdaName.indexOf('.Arn'))
+                                        if (stack.Resources[lambdaName]) {
+                                            var lambda = stack.Resources[lambdaName]
+                                            if (!lambda.Properties.Events) {
+                                                lambda.Properties.Events = {}
+                                            }
+                                            var event = {}
+                                            lambda.Properties.Events[path.replace(new RegExp('\/', 'g'), '_') + method] = event
+                                            event.Type = 'Api'
+                                            event.Properties = {}
+                                            event.Properties.Path = path
+                                            event.Properties.Method = method
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     return stack
 }
 function resolve(stack, reference) {
