@@ -12,7 +12,9 @@ Globals:
   Function:
     Timeout: 18
     Runtime: nodejs8.10
-    Handler: index.handler
+    Handler: index.requestHandler
+    Layers:
+        - !Ref SharedLayer
 Resources:
   ApiGateway:
     Type: 'AWS::Serverless::Api'
@@ -41,7 +43,6 @@ Resources:
   HelloLambda:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: index.requestHandler
       CodeUri: hellolambda/
       Runtime: nodejs8.10
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -52,13 +53,10 @@ Resources:
           Properties:
             Path: /hello
             Method: any
-      Layers:
-        - !Ref SharedLayer
   SharedLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
       ContentUri: sharedlayer/
-      
 Outputs:
   WebsiteUrl : 
       Description : Click here

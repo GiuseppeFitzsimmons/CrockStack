@@ -5,13 +5,22 @@ var http = require('http')
 var moduleAlias = require('module-alias')
 
 function startServer() {
+    var templateName = 'template.yaml'
+    console.log('process.argv', process.argv)
+    var _port = 8080
+    for (var i in process.argv) {
+        if (process.argv[i] == '--port') {
+            _port = process.argv[i*1+1]
+        } else if (process.argv[i] == '--template'){
+            templateName = process.argv[i*1+1]
+        }
+    }
     var answerFunction = async function (request, response) {
         var _path = request.url
         var _queryString = request.url
         if (_path.indexOf('?') > -1) {
             _path = _path.substring(0, _path.indexOf('?'))
             _queryString = _queryString.substring(_queryString.indexOf('?') + 1)
-
         }
         var event = {
             path: _path,
@@ -46,22 +55,18 @@ function startServer() {
             }
 
         }
-        let stack = loadTemplate()
+        let stack = loadTemplate(templateName)
         let lambda = getLambda(stack, event)
         if (lambda) {
-            if (lambda.Properties.Layers) {
-                for (var l in lambda.Properties.Layers) {
-                    let layerName = lambda.Properties.Layers[l]
-                    let layer = resolve(stack, layerName)
-                    console.log('./' + layer.Properties.ContentUri + 'nodejs')
-                    moduleAlias.addPath('./' + layer.Properties.ContentUri + 'nodejs')
+            let layers = getLayersforLambda(stack, lambda)
+            if (layers) {
+                for (var l in layers) {
+                    let layer = layers[l]
+                    moduleAlias.addPath(process.cwd()+'/' + layer.Properties.ContentUri + 'nodejs')
                 }
             }
-            let lambdaFunction = require('./' + lambda.Properties.CodeUri)
-            let handler = lambda.Properties.Handler
-            if (handler.indexOf('.') > -1) {
-                handler = handler.substring(handler.indexOf('.') + 1)
-            }
+            let lambdaFunction = require(process.cwd()+'/' + lambda.Properties.CodeUri)
+            let handler = getHandlerforLambda(stack, lambda)
             let result = await lambdaFunction[handler](event)
             response.statusCode = result.statusCode
             response.write(result.body)
@@ -73,7 +78,8 @@ function startServer() {
         response.end()
     }
     var server = http.createServer(answerFunction)
-    server.listen(8080)
+    server.listen(_port)
+    console.log('Server now listening on port ', _port)
 }
 
 function getLambda(stack, event) {
@@ -92,8 +98,32 @@ function getLambda(stack, event) {
         }
     }
 }
-function loadTemplate() {
-    let input = fs.readFileSync('./template.yaml', 'utf8')
+function getHandlerforLambda(stack, lambda) {
+    let handler = lambda.Properties.Handler
+    if (!handler && stack.Globals && stack.Globals.Function) {
+        handler = stack.Globals.Function.Handler
+    }
+    if (handler && handler.indexOf('.') > -1) {
+        handler = handler.substring(handler.indexOf('.') + 1)
+    }
+    return handler
+}
+function getLayersforLambda(stack, lambda) {
+    let layers = lambda.Properties.Layers
+    if (!layers && stack.Globals && stack.Globals.Function) {
+        layers = stack.Globals.Function.Layers
+    }
+    if (layers) {
+        var layerObjects = []
+        for (var l in layers) {
+            let layerName = layers[l]
+            layerObjects.push(resolve(stack, layerName))
+        }
+        return layerObjects
+    }
+}
+function loadTemplate(templateName) {
+    let input = fs.readFileSync(process.cwd()+'/'+templateName, 'utf8')
     input = input.replace(new RegExp("\: \!(.*?)", "g"), ": _____");
     input = input.replace(new RegExp("\: Fn\:\:(.*?)\:(.*?)", "g"), ": _____$1");
     input = input.replace(new RegExp("\- \!(.*?)", "g"), "- _____");
