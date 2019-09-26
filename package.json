@@ -12,6 +12,7 @@
     "file-system": "^2.2.2",
     "fs": "0.0.1-security",
     "js-yaml": "^3.13.1",
-    "module-alias": "^2.2.1"
+    "module-alias": "^2.2.1",
+    "yaml": "^1.7.0"
   }
 }

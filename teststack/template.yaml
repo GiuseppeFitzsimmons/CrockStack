@@ -8,18 +8,24 @@ Parameters:
     Description: The domain name
     Type: String
     Default: whatwoulddododo.com
+  BuildVersion:
+    Type: String
+    Default: V1
 Globals:
   Function:
     Timeout: 18
     Runtime: nodejs8.10
     Handler: index.requestHandler
+    Environment:
+      Variables:
+        GLOBAL_ENVIRONMENT_VARIABLE: 12
     Layers:
         - !Ref SharedLayer
 Resources:
   ApiGateway:
     Type: 'AWS::Serverless::Api'
     Properties:
-      Name: !Join ['-', [!Ref 'AWS::StackName', 'gateway']]
+      Name: "!Join ['-', [!Ref 'AWS::StackName', 'gateway']]"
       StageName: dev
       DefinitionBody:
         Fn::Transform:
@@ -32,8 +38,10 @@ Resources:
       Handler: index.handler
       CodeUri: askdonald/
       Runtime: nodejs8.10
-      Role: !GetAtt LambdaExecutionRole.Arn
-      RestApiId: !Ref ApiGateway
+      Role: 
+        !GetAtt LambdaExecutionRole.Arn
+      RestApiId: 
+        !Ref ApiGateway
       Events:
         ApiEventSource:
           Type: Api
@@ -48,10 +56,17 @@ Resources:
   HelloLambda:
     Type: AWS::Serverless::Function
     Properties:
+      Environment:
+        Variables:
+          BUILD_VERSION: 
+            !Ref BuildVersion
+          GREETING: "get lost"
       CodeUri: hellolambda/
       Runtime: nodejs8.10
-      Role: !GetAtt LambdaExecutionRole.Arn
-      RestApiId: !Ref ApiGateway
+      Role: 
+        !GetAtt LambdaExecutionRole.Arn
+      RestApiId: 
+        !Ref ApiGateway
       Events:
         ApiEventSource:
           Type: Api
@@ -62,7 +77,3 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       ContentUri: sharedlayer/
-Outputs:
-  WebsiteUrl : 
-      Description : Click here
-      Value: Fn::Ref: DomainNameString

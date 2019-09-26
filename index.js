@@ -1,5 +1,6 @@
 const fs = require('fs')
 const yaml = require('js-yaml')
+const YAML = require('yaml')
 const querystring = require('querystring')
 var http = require('http')
 var moduleAlias = require('module-alias')
@@ -64,6 +65,15 @@ function startServer() {
                     moduleAlias.addPath(process.cwd() + '/' + layer.Properties.ContentUri + 'nodejs')
                 }
             }
+            let variables = getEnvironmentVariablesforLambda(stack, lambda)
+            if (variables) {
+                for (var v in variables) {
+                    let variable = variables[v]
+                    for (var w in variable){
+                        process.env[w] = variable[w]
+                    }
+                }
+            }
             let lambdaFunction = require(process.cwd() + '/' + lambda.Properties.CodeUri)
             let handler = getHandlerforLambda(stack, lambda)
             let result = await lambdaFunction[handler](event)
@@ -89,8 +99,25 @@ function getLambda(stack, event) {
                 if (resourceEvent.Type == 'Api'
                     && (resourceEvent.Properties.Method == event.httpMethod
                         || resourceEvent.Properties.Method == 'any')
-                    && resourceEvent.Properties.Path == event.path) {
-                    return resource
+                ) {
+                    let incomingPath = event.path.split('/')
+                    let lambdaPath = resourceEvent.Properties.Path.split('/')
+                    let pathMatch = true
+                    if (incomingPath.length == lambdaPath.length) {
+                        for (var _index in incomingPath) {
+                            if (incomingPath[_index] != lambdaPath[_index] &&
+                                (lambdaPath[_index].indexOf('{') != 0 ||
+                                    lambdaPath[_index].lastIndexOf('}') != lambdaPath[_index].length - 1)) {
+                                pathMatch = false
+                                break
+                            }
+                        }
+                    } else {
+                        pathMatch = false
+                    }
+                    if (pathMatch) {
+                        return resource
+                    }
                 }
             }
         }
@@ -120,16 +147,47 @@ function getLayersforLambda(stack, lambda) {
         return layerObjects
     }
 }
+function getEnvironmentVariablesforLambda(stack, lambda) {
+    let lambdaVariables;
+    let globalVariables;
+    if (stack.Globals && stack.Globals.Function && stack.Globals.Function.Environment.Variables) {
+        globalVariables = stack.Globals.Function.Environment.Variables
+    }
+    if (lambda.Environment && lambda.Environment.Variables) {
+        lambdaVariables = lambda.Environment.Variables
+    }
+    var variablesObjects = []
+    if (lambdaVariables){
+        for (var v in lambdaVariables) {
+            let variablesName = lambdaVariables[v]
+            let variable = {}
+            variable[v] = resolve(stack, variablesName)
+            variablesObjects.push(variable)
+        }
+    }
+    if (globalVariables){
+        for (var v in globalVariables) {
+            let variablesName = globalVariables[v]
+            let variable = {}
+            variable[v] = resolve(stack, variablesName)
+            variablesObjects.push(variable)
+        }
+    }
+    return variablesObjects
+}
 function loadTemplate(templateName) {
     let input = fs.readFileSync(process.cwd() + '/' + templateName, 'utf8')
-    input = input.replace(new RegExp("Fn\:\:Transform\:", "g"), "_____Transform\:");
+    /*input = input.replace(new RegExp("Fn\:\:Transform\:", "g"), "_____Transform\:");
     input = input.replace(new RegExp("\!Transform", "g"), "_____Transform\:");
     input = input.replace(new RegExp("\: \!(.*?)", "g"), ": _____");
     input = input.replace(new RegExp("\: Fn\:\:(.*?)\:(.*?)", "g"), ": _____$1");
     input = input.replace(new RegExp("\- \!(.*?)", "g"), "- _____");
     input = input.replace(new RegExp("\- Fn\:\:(.*?)\:(.*?)", "g"), "- _____$1");
-    input = input.replace(new RegExp("Fn\:\:(.*?)\:", "g"), "- _____$1");
+    input = input.replace(new RegExp("Fn\:\:(.*?)\:", "g"), "- _____$1");*/
+    input = input.replace(new RegExp("Fn\:\:(.*?)\:(.*?)", "g"), " _____$1:");
+    input = input.replace(new RegExp("\!(.*?) (.*?)", "g"), " _____$1: ");
     let stack = yaml.load(input)
+    //let stack = YAML.parse(input)
     for (i in stack.Resources) {
         var resource = stack.Resources[i]
         if (resource.Type == 'AWS::Serverless::Api') {
@@ -139,6 +197,7 @@ function loadTemplate(templateName) {
                     resource.Properties.DefinitionBody._____Transform.Parameters &&
                     resource.Properties.DefinitionBody._____Transform.Parameters.Location) {
                     swaggerString = fs.readFileSync(process.cwd() + '/' + resource.Properties.DefinitionBody._____Transform.Parameters.Location, 'utf8')
+                    //paths = YAML.parse(swaggerString)
                     paths = yaml.load(swaggerString)
                 }
                 if (paths) {
@@ -178,10 +237,13 @@ function loadTemplate(templateName) {
     return stack
 }
 function resolve(stack, reference) {
-    if (reference.indexOf('_____Ref ') > -1) {
-        reference = reference.substring(reference.indexOf('_____Ref ') + 9)
-    }
-    console.log('reference', reference)
-    return stack.Resources[reference]
+    if (typeof (reference) == 'object') {
+        if (reference._____Ref) {
+            if (stack.Parameters[reference._____Ref]) {
+                return stack.Parameters[reference._____Ref].Default
+            }
+            return stack.Resources[reference._____Ref]
+        }
+    } return reference
 }
 startServer()
