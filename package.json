@@ -1,7 +1,7 @@
 {
   "name": "crockstack",
   "version": "1.0.0",
-  "description": "",
+  "description": "CrockStack is for developers for whom the AWS-SAM start-local with a full-blown Docker image is impractical, or impossible.\r It replaces start-local by reading your template.yaml (and any associated openapi.yaml), and exposing your functions on a local http server.",
   "main": "index.js",
   "scripts": {
     "test": "cd test && node tests.js"
@@ -15,5 +15,17 @@
     "module-alias": "^2.2.1",
     "node-fetch": "^2.6.0",
     "yaml": "^1.7.0"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GiuseppeFitzsimmons/CrockStack.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GiuseppeFitzsimmons/CrockStack/issues"
+  },
+  "homepage": "https://github.com/GiuseppeFitzsimmons/CrockStack#readme"
 }
