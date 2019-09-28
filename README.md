@@ -13,7 +13,7 @@ CrockStack has many limitations:
 
 Start from the location of your template.yaml
 ```javascript
-node CrockStack/index.js
+node node_modules/crockstack/cli.js
 ```
 Crockstack supports may start-local parameters, such as
 ```javascript
@@ -29,4 +29,4 @@ npm install crockstack
 ```
 
 ## Version ##
-The current version is 1.0.0
+The current version is 1.0.2
