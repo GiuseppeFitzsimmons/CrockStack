@@ -24,7 +24,7 @@ Start from the location of your template.yaml
 ```javascript
 node node_modules/crockstack/cli.js
 ```
-Crockstack supports may start-local parameters, such as
+Crockstack supports most start-local parameters, such as
 ```javascript
 node CrockStack/index.js --port 3000 --env-vars yourfile.json --parameter-overrides "BuildVersion=v4,Greeting=hello" --template productiontemplate.yaml
 ```
