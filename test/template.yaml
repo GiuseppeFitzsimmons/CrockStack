@@ -11,6 +11,12 @@ Parameters:
   BuildVersion:
     Type: String
     Default: V1
+  Environment:
+    Type: String
+    Default: ''
+  Greeting:
+    Type: String
+    Default: ''
 Globals:
   Function:
     Timeout: 18
@@ -19,6 +25,8 @@ Globals:
     Environment:
       Variables:
         GLOBAL_ENVIRONMENT_VARIABLE: 12
+        ENVIRONMENT: 
+          !Ref Environment
     Layers:
         - !Ref SharedLayer
 Resources:
@@ -60,7 +68,8 @@ Resources:
         Variables:
           BUILD_VERSION: 
             !Ref BuildVersion
-          GREETING: "get lost"
+          GREETING:
+            !Ref Greeting
       CodeUri: hellolambda/
       Runtime: nodejs8.10
       Role: 

@@ -4,6 +4,7 @@ const YAML = require('yaml')
 const querystring = require('querystring')
 var http = require('http')
 var moduleAlias = require('module-alias')
+const parameterOverrides = {'AWS::StackName': 'CrockStack','AWS::Region': 'local'}
 
 function startServer() {
     var templateName = 'template.yaml'
@@ -13,6 +14,18 @@ function startServer() {
             _port = process.argv[i * 1 + 1]
         } else if (process.argv[i] == '--template') {
             templateName = process.argv[i * 1 + 1]
+        } else if (process.argv[i] == '--parameter-overrides'){
+            let _string = process.argv[i * 1 + 1]
+            let _splitted = _string.split(',')
+            for (var i in _splitted){
+                var _splits = _splitted[i].split('=')
+                parameterOverrides[_splits[0]] = _splits[1]
+            }
+        } else if (process.argv[i] == '--env-vars'){
+            let fileName = process.argv[i * 1 + 1]
+            let fileContents = fs.readFileSync(process.cwd() + '/' + fileName, 'utf8')
+            let parsedContents = JSON.parse(fileContents)
+            Object.assign(parameterOverrides, parsedContents.Parameters)
         }
     }
     var answerFunction = async function (request, response) {
@@ -153,8 +166,8 @@ function getEnvironmentVariablesforLambda(stack, lambda) {
     if (stack.Globals && stack.Globals.Function && stack.Globals.Function.Environment.Variables) {
         globalVariables = stack.Globals.Function.Environment.Variables
     }
-    if (lambda.Environment && lambda.Environment.Variables) {
-        lambdaVariables = lambda.Environment.Variables
+    if (lambda.Properties.Environment && lambda.Properties.Environment.Variables) {
+        lambdaVariables = lambda.Properties.Environment.Variables
     }
     var variablesObjects = []
     if (lambdaVariables){
@@ -239,6 +252,9 @@ function loadTemplate(templateName) {
 function resolve(stack, reference) {
     if (typeof (reference) == 'object') {
         if (reference._____Ref) {
+            if (parameterOverrides[reference._____Ref]){
+                return parameterOverrides[reference._____Ref]
+            }
             if (stack.Parameters[reference._____Ref]) {
                 return stack.Parameters[reference._____Ref].Default
             }
