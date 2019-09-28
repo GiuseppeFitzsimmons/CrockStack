@@ -24,5 +24,8 @@ After launching, you should be able to access your API at localhost:8080.
 ## Installation ##
 
 ```javascript
-npm install crock-stack
+npm install crockstack
 ```
+
+## Version ##
+The current version is 1.0.0
