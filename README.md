@@ -5,7 +5,16 @@ It replaces start-local by reading your template.yaml (and any associated openap
 ## Limitations ##
 CrockStack has many limitations:
 * It only supports Node (AWS supports Node, Java, Python and Go).
-* It only supports yaml (we’ll be adding support for JSON shortly) and the syntax is very strict.
+* It only supports yaml (we’ll be adding support for JSON shortly) and the syntax is very strict. In particular, if you ever see something like "incomplete explicit mapping pair", it probably means that you need to put your function, for instance !Ref, on the next line and indented.
+    * This won't work
+```javascript
+    DomainName: !Sub ${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com
+```
+    * But this will
+```javascript
+    DomainName:
+        !Sub ${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com
+```
 * It only implements three resource types: Lambda, Gateway and Layers (I’ll be adding DynamoDb and CustomAuthorizers next, and I'm open to suggestions)
 * It only supports the !Ref function (more are pending shortly)
 
