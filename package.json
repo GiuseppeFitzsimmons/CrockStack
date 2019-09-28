@@ -1,6 +1,6 @@
 {
   "name": "crockstack",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -15,5 +15,6 @@
     "module-alias": "^2.2.1",
     "node-fetch": "^2.6.0",
     "yaml": "^1.7.0"
-  }
+  },
+  "bin": "./cli.js"
 }

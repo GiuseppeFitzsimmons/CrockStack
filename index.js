@@ -262,4 +262,5 @@ function resolve(stack, reference) {
         }
     } return reference
 }
-startServer()
+//startServer()
+module.exports = {startServer}
