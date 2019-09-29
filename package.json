@@ -1,12 +1,13 @@
 {
   "name": "crockstack",
-  "version": "1.0.4",
-  "description": "",
+  "homepage": "https://github.com/GiuseppeFitzsimmons/CrockStack",
+  "version": "1.0.5",
+  "description": "An alternative to AWS SAM start-local",
   "main": "index.js",
   "scripts": {
     "test": "cd test && node tests.js"
   },
-  "author": "",
+  "author": "Giuseppe Fitzsimmons",
   "license": "ISC",
   "dependencies": {
     "file-system": "^2.2.2",
@@ -16,5 +17,12 @@
     "node-fetch": "^2.6.0",
     "yaml": "^1.7.0"
   },
+  "keywords": [
+    "AWS",
+    "SAM",
+    "start-local",
+    "Docker",
+    "lambda"
+  ],
   "bin": "./cli.js"
 }

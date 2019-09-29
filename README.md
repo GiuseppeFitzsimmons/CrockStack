@@ -6,7 +6,7 @@ It replaces start-local by reading your template.yaml (and any associated openap
 CrockStack has many limitations:
 
 * It only supports Node (AWS supports Node, Java, Python and Go).
-* It only supports yaml (we’ll be adding support for JSON shortly) and the syntax is very strict. In particular, if you ever see something like "incomplete explicit mapping pair", it probably means that you need to put your function, for instance !Ref, on the next line and indented.
+* It only supports yaml (I’ll be adding support for JSON shortly) and the syntax is very strict. In particular, if you ever see something like "incomplete explicit mapping pair", it probably means that you need to put your function, for instance !Ref, on the next line and indented.
 
 This won't work
 
@@ -52,4 +52,4 @@ After launching, you should be able to access your API at localhost:8080.
 
 
 ## Version ##
-The current version is 1.0.4
+The current version is 1.0.5

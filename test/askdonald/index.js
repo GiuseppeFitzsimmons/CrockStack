@@ -1,5 +1,5 @@
 /*
-AskDonald is the NLP Donald Trump quote engine for WhatWouldDonalDo (whatwoulddododo.com)
+AskDonald is the NLP Donald Trump quote engine for WhatWouldDonaldDo (whatwoulddododo.com)
 */
 
 const quoteDB = require('./quotes.json');
