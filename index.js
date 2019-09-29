@@ -4,7 +4,7 @@ const YAML = require('yaml')
 const querystring = require('querystring')
 var http = require('http')
 var moduleAlias = require('module-alias')
-const parameterOverrides = {'AWS::StackName': 'CrockStack','AWS::Region': 'local'}
+const parameterOverrides = { 'AWS::StackName': 'CrockStack', 'AWS::Region': 'local' }
 
 function startServer() {
     var templateName = 'template.yaml'
@@ -14,18 +14,27 @@ function startServer() {
             _port = process.argv[i * 1 + 1]
         } else if (process.argv[i] == '--template') {
             templateName = process.argv[i * 1 + 1]
-        } else if (process.argv[i] == '--parameter-overrides'){
+        } else if (process.argv[i] == '--parameter-overrides') {
             let _string = process.argv[i * 1 + 1]
             let _splitted = _string.split(',')
-            for (var i in _splitted){
+            for (var i in _splitted) {
                 var _splits = _splitted[i].split('=')
                 parameterOverrides[_splits[0].trim()] = _splits[1].trim()
             }
-        } else if (process.argv[i] == '--env-vars'){
+        } else if (process.argv[i] == '--env-vars') {
             let fileName = process.argv[i * 1 + 1]
             let fileContents = fs.readFileSync(process.cwd() + '/' + fileName, 'utf8')
             let parsedContents = JSON.parse(fileContents)
             Object.assign(parameterOverrides, parsedContents.Parameters)
+        }
+    }
+    var startStack = loadTemplate(templateName)
+    for (i in startStack.Resources){
+        let resource = startStack.Resources[i]
+        if (resource.Type == 'AWS::DynamoDB::Table' ){
+            if (parameterOverrides.DymamoDBEndpoint){
+                createTable(startStack, resource)
+            }
         }
     }
     var answerFunction = async function (request, response) {
@@ -82,7 +91,7 @@ function startServer() {
             if (variables) {
                 for (var v in variables) {
                     let variable = variables[v]
-                    for (var w in variable){
+                    for (var w in variable) {
                         process.env[w] = variable[w]
                     }
                 }
@@ -102,7 +111,25 @@ function startServer() {
     server.listen(_port)
     console.log('Server now listening on port ', _port)
 }
-
+function createTable(stack, resource){
+    delete resource.Properties.BillingMode;
+    delete resource.Properties.PointInTimeRecoverySpecification;
+    const {execSync} = require ('child_process')
+    resource.Properties.TableName = resolve(stack, resource.Properties.TableName)
+    fs.writeFileSync(resource.Properties.TableName+'.JSON', JSON.stringify(resource.Properties))
+    try {
+        execSync('aws dynamodb delete-table --table-name '+resource.Properties.TableName+' --endpoint-url '+parameterOverrides.DymamoDBEndpoint)
+    } catch(err) {
+        
+    }
+    try {
+        execSync('aws dynamodb create-table --cli-input-json file://'+resource.Properties.TableName+'.JSON --endpoint-url '+parameterOverrides.DymamoDBEndpoint)
+    } catch(err) {
+        
+    }
+    fs.unlinkSync(resource.Properties.TableName+'.JSON')
+    
+}
 function getLambda(stack, event) {
     for (var i in stack.Resources) {
         let resource = stack.Resources[i]
@@ -170,7 +197,7 @@ function getEnvironmentVariablesforLambda(stack, lambda) {
         lambdaVariables = lambda.Properties.Environment.Variables
     }
     var variablesObjects = []
-    if (lambdaVariables){
+    if (lambdaVariables) {
         for (var v in lambdaVariables) {
             let variablesName = lambdaVariables[v]
             let variable = {}
@@ -178,7 +205,7 @@ function getEnvironmentVariablesforLambda(stack, lambda) {
             variablesObjects.push(variable)
         }
     }
-    if (globalVariables){
+    if (globalVariables) {
         for (var v in globalVariables) {
             let variablesName = globalVariables[v]
             let variable = {}
@@ -252,15 +279,44 @@ function loadTemplate(templateName) {
 function resolve(stack, reference) {
     if (typeof (reference) == 'object') {
         if (reference._____Ref) {
-            if (parameterOverrides[reference._____Ref]){
+            if (parameterOverrides[reference._____Ref]) {
                 return parameterOverrides[reference._____Ref]
             }
             if (stack.Parameters[reference._____Ref]) {
                 return stack.Parameters[reference._____Ref].Default
             }
             return stack.Resources[reference._____Ref]
+        } else if (reference._____Join) {
+            if (typeof (reference._____Join) == 'object') {
+                let newArray = []
+                for (var i in reference._____Join[1]) {
+                    let entry = reference._____Join[1][i]
+                    if (typeof (entry) == 'object') {
+                        let resolved = resolve(stack, entry)
+                        newArray.push(resolved)
+                    } else {
+                        newArray.push(entry)
+                    }
+                }
+                return newArray.join(reference._____Join[0])
+            }
+        } else if (reference._____FindInMap) {
+            if (typeof (reference._____FindInMap) == 'object') {
+                let newArray = []
+                for (var i in reference._____FindInMap) {
+                    let entry = reference._____FindInMap[i]
+                    if (typeof (entry) == 'object') {
+                        let resolved = resolve(stack, entry)
+                        newArray.push(resolved)
+                    } else {
+                        newArray.push(entry)
+                    }
+                }
+                return stack.Mappings[newArray[0]][newArray[1]][newArray[2]]
+            }
         }
-    } return reference
+    }
+    return reference
 }
 //startServer()
-module.exports = {startServer}
+module.exports = { startServer }

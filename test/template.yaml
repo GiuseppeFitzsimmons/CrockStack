@@ -17,6 +17,14 @@ Parameters:
   Greeting:
     Type: String
     Default: ''
+Mappings: 
+  StackMap: 
+    CrockStack: 
+      Greeting: "Hello from CrockStack"
+    dev-stack: 
+      Greeting: "Hello from the Development environment"
+    prod-stack: 
+      Greeting: "Hello from the Production environment"
 Globals:
   Function:
     Timeout: 18
@@ -24,6 +32,12 @@ Globals:
     Handler: index.requestHandler
     Environment:
       Variables:
+        MAP_TEST:
+          !FindInMap [ StackMap, !Ref 'AWS::StackName', 'Greeting' ]
+        SUB_TEST:
+          !Sub ${AWS::StackName}-sub-test
+        USER_TABLE_NAME: 
+          !Join ['-', [!Ref 'AWS::StackName', 'user-table']]
         GLOBAL_ENVIRONMENT_VARIABLE: 12
         ENVIRONMENT: 
           !Ref Environment
@@ -86,3 +100,25 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       ContentUri: sharedlayer/
+  CrockTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: 
+        !Join ['-', [!Ref 'AWS::StackName', 'crock-table']]
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        - AttributeName: date
+          KeyType: RANGE
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: date
+          AttributeType: S
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      BillingMode: PROVISIONED
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+        

@@ -3,8 +3,11 @@ const fetch = require('node-fetch')
 
 async function setUp() {
     return new Promise((resolve, reject) => {
-        var executed = childProcess.exec('node ../index.js --env-vars devvariables.json')
+        var executed = childProcess.exec('node ../cli.js --env-vars devvariables.json')
         executed.stdout.on('data', (data) => {
+            console.log(data)
+        })
+        executed.stderr.on('data', (data) => {
             console.log(data)
         })
         setTimeout(function () {
