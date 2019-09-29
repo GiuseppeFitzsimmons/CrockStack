@@ -23,6 +23,8 @@ But this will
 * It only implements three resource types: Lambda, Gateway and Layers (I’ll be adding DynamoDb and CustomAuthorizers next, and I'm open to suggestions)
 * It only supports the !Ref function (more are pending shortly)
 
+CrockStack is a work in progress and it's not by any means intended as a full replacement for SAM start-local, so please manage your expectations accordingly.
+
 ## Usage ##
 
     npm install crockstack
@@ -50,4 +52,4 @@ After launching, you should be able to access your API at localhost:8080.
 
 
 ## Version ##
-The current version is 1.0.3
+The current version is 1.0.4
