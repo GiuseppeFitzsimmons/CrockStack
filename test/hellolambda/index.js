@@ -11,7 +11,8 @@ exports.requestHandler = async (event, context) => {
         environment: process.env.ENVIRONMENT, 
         greeting:process.env.GREETING, 
         helper: helper(),
-        userTable: process.env.USER_TABLE_NAME
+        userTable: process.env.USER_TABLE_NAME,
+        mapGreeting: process.env.MAP_TEST
     })
     return returnObject
 }

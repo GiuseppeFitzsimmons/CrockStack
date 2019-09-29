@@ -17,6 +17,14 @@ Parameters:
   Greeting:
     Type: String
     Default: ''
+Mappings: 
+  StackMap: 
+    CrockStack: 
+      Greeting: "Hello from CrockStack"
+    dev-stack: 
+      Greeting: "Hello from the Development environment"
+    prod-stack: 
+      Greeting: "Hello from the Production environment"
 Globals:
   Function:
     Timeout: 18
@@ -24,6 +32,10 @@ Globals:
     Handler: index.requestHandler
     Environment:
       Variables:
+        MAP_TEST:
+          !FindInMap [ StackMap, !Ref 'AWS::StackName', 'Greeting' ]
+        SUB_TEST:
+          !Sub ${AWS::StackName}-sub-test
         USER_TABLE_NAME: 
           !Join ['-', [!Ref 'AWS::StackName', 'user-table']]
         GLOBAL_ENVIRONMENT_VARIABLE: 12

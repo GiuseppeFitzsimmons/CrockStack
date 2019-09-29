@@ -259,12 +259,12 @@ function resolve(stack, reference) {
                 return stack.Parameters[reference._____Ref].Default
             }
             return stack.Resources[reference._____Ref]
-        } else if (reference.hasOwnProperty('_____Join')) {
-            if (typeof(reference._____Join)== 'object'){
+        } else if (reference._____Join) {
+            if (typeof (reference._____Join) == 'object') {
                 let newArray = []
-                for (var i in reference._____Join[1]){
+                for (var i in reference._____Join[1]) {
                     let entry = reference._____Join[1][i]
-                    if (typeof(entry) == 'object'){
+                    if (typeof (entry) == 'object') {
                         let resolved = resolve(stack, entry)
                         newArray.push(resolved)
                     } else {
@@ -272,6 +272,21 @@ function resolve(stack, reference) {
                     }
                 }
                 return newArray.join(reference._____Join[0])
+            }
+        } else if (reference._____FindInMap) {
+            if (typeof (reference._____FindInMap) == 'object') {
+                let newArray = []
+                for (var i in reference._____FindInMap) {
+                    let entry = reference._____FindInMap[i]
+                    if (typeof (entry) == 'object') {
+                        let resolved = resolve(stack, entry)
+                        newArray.push(resolved)
+                    } else {
+                        newArray.push(entry)
+                    }
+                }
+                console.log(newArray, stack.Mappings[newArray[0]])
+                return stack.Mappings[newArray[0]][newArray[1]][newArray[2]]
             }
         }
     }
