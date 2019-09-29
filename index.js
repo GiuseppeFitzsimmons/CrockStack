@@ -28,6 +28,15 @@ function startServer() {
             Object.assign(parameterOverrides, parsedContents.Parameters)
         }
     }
+    var startStack = loadTemplate(templateName)
+    for (i in startStack.Resources){
+        let resource = startStack.Resources[i]
+        if (resource.Type == 'AWS::DynamoDB::Table' ){
+            if (parameterOverrides.DymamoDBEndpoint){
+                createTable(startStack, resource)
+            }
+        }
+    }
     var answerFunction = async function (request, response) {
         var _path = request.url
         var _queryString = request.url
@@ -102,7 +111,25 @@ function startServer() {
     server.listen(_port)
     console.log('Server now listening on port ', _port)
 }
-
+function createTable(stack, resource){
+    delete resource.Properties.BillingMode;
+    delete resource.Properties.PointInTimeRecoverySpecification;
+    const {execSync} = require ('child_process')
+    resource.Properties.TableName = resolve(stack, resource.Properties.TableName)
+    fs.writeFileSync(resource.Properties.TableName+'.JSON', JSON.stringify(resource.Properties))
+    try {
+        execSync('aws dynamodb delete-table --table-name '+resource.Properties.TableName+' --endpoint-url '+parameterOverrides.DymamoDBEndpoint)
+    } catch(err) {
+        
+    }
+    try {
+        execSync('aws dynamodb create-table --cli-input-json file://'+resource.Properties.TableName+'.JSON --endpoint-url '+parameterOverrides.DymamoDBEndpoint)
+    } catch(err) {
+        
+    }
+    fs.unlinkSync(resource.Properties.TableName+'.JSON')
+    
+}
 function getLambda(stack, event) {
     for (var i in stack.Resources) {
         let resource = stack.Resources[i]
@@ -285,7 +312,6 @@ function resolve(stack, reference) {
                         newArray.push(entry)
                     }
                 }
-                console.log(newArray, stack.Mappings[newArray[0]])
                 return stack.Mappings[newArray[0]][newArray[1]][newArray[2]]
             }
         }

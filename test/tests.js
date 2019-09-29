@@ -7,6 +7,9 @@ async function setUp() {
         executed.stdout.on('data', (data) => {
             console.log(data)
         })
+        executed.stderr.on('data', (data) => {
+            console.log(data)
+        })
         setTimeout(function () {
             resolve()
         }, 2000)

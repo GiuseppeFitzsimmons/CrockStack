@@ -100,3 +100,25 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       ContentUri: sharedlayer/
+  CrockTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: 
+        !Join ['-', [!Ref 'AWS::StackName', 'crock-table']]
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        - AttributeName: date
+          KeyType: RANGE
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: date
+          AttributeType: S
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      BillingMode: PROVISIONED
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+        
