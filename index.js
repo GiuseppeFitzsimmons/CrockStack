@@ -19,7 +19,7 @@ function startServer() {
             let _splitted = _string.split(',')
             for (var i in _splitted){
                 var _splits = _splitted[i].split('=')
-                parameterOverrides[_splits[0]] = _splits[1]
+                parameterOverrides[_splits[0].trim()] = _splits[1].trim()
             }
         } else if (process.argv[i] == '--env-vars'){
             let fileName = process.argv[i * 1 + 1]
