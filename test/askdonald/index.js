@@ -1,3 +1,7 @@
+/*
+AskDonald is the NLP Donald Trump quote engine for WhatWouldDonalDo (whatwoulddododo.com)
+*/
+
 const quoteDB = require('./quotes.json');
 const quotes = quoteDB.quotes;
 const categories = quoteDB.categories;
@@ -6,7 +10,6 @@ const comprehend = new AWS.Comprehend({ apiVersion: '2017-11-27', region: 'us-ea
 require('fuzzyset.js');
 
 exports.handler = async (event, context) => {
-  //console.log(event.queryStringParameters);
   var response = {
     statusCode: 200,
     headers: {
@@ -41,23 +44,6 @@ exports.handler = async (event, context) => {
     return response;
   }
 };
-/*
-//async means the function can run asynchronously, allowing it to use await. However, every function in the chain must also be asynchronous
-async function nlpQuote(question){
-	const params = {
-		LanguageCode: 'en',
-		Text: question
-	}
-	//let "code" await=> the let code waits for the await code to work, in this case we detect key phrases
-	//before giving them to keyPhrases. Generally assume that let and var are interchangeable, the main useful difference
-	//being that let is "scoped"(=local) to the loop, whereas var stays in memory
-	let keyPhrases=await comprehend.detectKeyPhrases(params)
-	console.log(keyPhrases)
-}
-
- //console.log(getRandomQuote());
- */
-
 async function nlpQuote(question) {
   //slice -1 takes the last character, as it's shorthand for length-1
   if (question.slice(-1) != '?') {
@@ -93,9 +79,6 @@ async function nlpQuote(question) {
     quotes.forEach(function (quoteObject) {
       quoteObject.rank = 0;
       let quote = quoteObject.quote.toLowerCase()
-      //regexp is a Regular Expression, and allows one to search through a string
-      //We're going through the KeyPhrases, turning the Text (which is an element of the KeyPHrases object) into lowercase,
-      //then counting when it matches (the quote) and putting it in an array
       let quoteArray = quote.split(" ");
       let fuzzySet = FuzzySet();
       quoteArray.forEach(function (fuzz) {
@@ -115,17 +98,9 @@ async function nlpQuote(question) {
           }
         })
 
-				/*var rgxp = new RegExp(keyPhrase.Text.toLowerCase(), "g");
-				//quote.match returns an array as .match always returns an array
-				var matches=quote.match(rgxp);
-				if (matches){
-					//matches.length is the number of matches in the array
-					quoteObject.rank+=matches.length
-				}*/
       })
     })
     if (!found) {
-      //console.log(categories);
       categories.forEach(function (category) {
         let categoryKeyWords = category.keywords
         category.rank = 0;
@@ -161,55 +136,10 @@ async function nlpQuote(question) {
         })
       }
     }
-    //so lets say we get here and we still haven't found a match (we could set found=true above after "if (sortedCategories[0].rank > 0) {")
-    //There's an extra category called SALAD, which has no key words, which I assigned to complete nonsense quotes.
-    //So if we still don't have a matching quote, we could just...
-    //iterate through our quotes again
-      //and if quote.categories.includes("SALAD")
-        //we just increment the rank of the quote
-    //that's all. Then below the quotes will be sorted and filtered, and only those with the category salad will be returned
-    //I'd suggest that we log this, with the question, to see what questions are not getting pertinent responses.
-
-
-    /*	forEach (categories);{
-        categories.rank=0;
-        //create keyWords as individual words from keyPhrase
-        let keyWords=keyPhrase.Text.split(" ");
-        //fuzzyKeyWords is hopefully keyWords that match those in categories
-        let fuzzyKeyWords=keyWords.match(categories);
-        forEach (fuzzyKeyWords);{
-          
-        }
-    
-    
-      	
-      }
-      */
-
-
-		/*SUPPOSE we get here, and we didn't find a match (we could just put a variable before quotes.forEach that says "found=false" and then set it )
-		to true when we get a match), then we might want to apply the categories, like this...*/
-    //Just like the whole block above...
-    //for each category
-    //set the rank of the category to 0
-    //create a fuzzyzet
-    //for each word in the category (have a look at the quotes.json file)
-    //add the word to the fuzzyset
-    //for each keyword
-    //split the keyword on " " (a space, in case the keyword is "white house")
-    //for each keyword in the split array
-    //get the fuzzy match (like above), and add its value to the rank of the category
-    //Now our categories array each has a rank ranging from 0 to something (or zero to zero, in the case that we didn't find matching category)
-    //we sort out category (as we do below)
-    //Take the top category (categories[0]), and then
-    //for each quote, if the category includes the name of the top category, up the rank of the quote by 1
-    //then continue as below
-
     var sortedQuotes = quotes.sort(function (a, b) {
       //The way the ranking works is comparing two ranks via subtraction. Obviously, if the number is negative then the rank was inferior, postive means the rank was superior, 0 means equal ranks
       return b.rank - a.rank;
     })
-    //console.log(sortedQuotes);
     var filteredQuotes = sortedQuotes.filter(function (quoteObject) {
       return quoteObject.rank >= sortedQuotes[0].rank;
     })
@@ -236,11 +166,3 @@ const stopwords = [
 
 exports.handler({ queryStringParameters: { question: 'Do you believe in Canada?' } });
 
-
-
-
-/* for (cat in categories){
- let categoryKeyWords=categories[cat]
- console.log(cat, categoryKeyWords);
-}
-*/

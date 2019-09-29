@@ -33,7 +33,7 @@ Resources:
   ApiGateway:
     Type: 'AWS::Serverless::Api'
     Properties:
-      Name: "!Join ['-', [!Ref 'AWS::StackName', 'gateway']]"
+      Name: gateway
       StageName: dev
       DefinitionBody:
         Fn::Transform:
