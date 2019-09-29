@@ -24,6 +24,8 @@ Globals:
     Handler: index.requestHandler
     Environment:
       Variables:
+        USER_TABLE_NAME: 
+          !Join ['-', [!Ref 'AWS::StackName', 'user-table']]
         GLOBAL_ENVIRONMENT_VARIABLE: 12
         ENVIRONMENT: 
           !Ref Environment

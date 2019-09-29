@@ -4,7 +4,7 @@ const YAML = require('yaml')
 const querystring = require('querystring')
 var http = require('http')
 var moduleAlias = require('module-alias')
-const parameterOverrides = {'AWS::StackName': 'CrockStack','AWS::Region': 'local'}
+const parameterOverrides = { 'AWS::StackName': 'CrockStack', 'AWS::Region': 'local' }
 
 function startServer() {
     var templateName = 'template.yaml'
@@ -14,14 +14,14 @@ function startServer() {
             _port = process.argv[i * 1 + 1]
         } else if (process.argv[i] == '--template') {
             templateName = process.argv[i * 1 + 1]
-        } else if (process.argv[i] == '--parameter-overrides'){
+        } else if (process.argv[i] == '--parameter-overrides') {
             let _string = process.argv[i * 1 + 1]
             let _splitted = _string.split(',')
-            for (var i in _splitted){
+            for (var i in _splitted) {
                 var _splits = _splitted[i].split('=')
                 parameterOverrides[_splits[0].trim()] = _splits[1].trim()
             }
-        } else if (process.argv[i] == '--env-vars'){
+        } else if (process.argv[i] == '--env-vars') {
             let fileName = process.argv[i * 1 + 1]
             let fileContents = fs.readFileSync(process.cwd() + '/' + fileName, 'utf8')
             let parsedContents = JSON.parse(fileContents)
@@ -82,7 +82,7 @@ function startServer() {
             if (variables) {
                 for (var v in variables) {
                     let variable = variables[v]
-                    for (var w in variable){
+                    for (var w in variable) {
                         process.env[w] = variable[w]
                     }
                 }
@@ -170,7 +170,7 @@ function getEnvironmentVariablesforLambda(stack, lambda) {
         lambdaVariables = lambda.Properties.Environment.Variables
     }
     var variablesObjects = []
-    if (lambdaVariables){
+    if (lambdaVariables) {
         for (var v in lambdaVariables) {
             let variablesName = lambdaVariables[v]
             let variable = {}
@@ -178,7 +178,7 @@ function getEnvironmentVariablesforLambda(stack, lambda) {
             variablesObjects.push(variable)
         }
     }
-    if (globalVariables){
+    if (globalVariables) {
         for (var v in globalVariables) {
             let variablesName = globalVariables[v]
             let variable = {}
@@ -252,15 +252,30 @@ function loadTemplate(templateName) {
 function resolve(stack, reference) {
     if (typeof (reference) == 'object') {
         if (reference._____Ref) {
-            if (parameterOverrides[reference._____Ref]){
+            if (parameterOverrides[reference._____Ref]) {
                 return parameterOverrides[reference._____Ref]
             }
             if (stack.Parameters[reference._____Ref]) {
                 return stack.Parameters[reference._____Ref].Default
             }
             return stack.Resources[reference._____Ref]
+        } else if (reference.hasOwnProperty('_____Join')) {
+            if (typeof(reference._____Join)== 'object'){
+                let newArray = []
+                for (var i in reference._____Join[1]){
+                    let entry = reference._____Join[1][i]
+                    if (typeof(entry) == 'object'){
+                        let resolved = resolve(stack, entry)
+                        newArray.push(resolved)
+                    } else {
+                        newArray.push(entry)
+                    }
+                }
+                return newArray.join(reference._____Join[0])
+            }
         }
-    } return reference
+    }
+    return reference
 }
 //startServer()
-module.exports = {startServer}
+module.exports = { startServer }
