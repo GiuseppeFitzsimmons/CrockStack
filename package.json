@@ -17,6 +17,10 @@
     "node-fetch": "^2.6.0",
     "yaml": "^1.7.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GiuseppeFitzsimmons/CrockStack.git"
+  },
   "keywords": [
     "AWS",
     "SAM",
