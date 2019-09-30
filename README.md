@@ -22,7 +22,7 @@ But this will
 
 * It only implements four resource types: Lambda, Gateway, Layer and DynamoDB (I’ll be adding CustomAuthorizers next, and I'm open to suggestions)
     * For DynamoDB support, you need a local instance running, and need to pass a parameter called "DymamoDBEndpoint" using "--env-vars" or "--parameter-overrides".
-* It only supports the !Ref, !Join, !Transform and !FindInMap functions (more are pending shortly)
+* It supports the !Ref, !Join, !Transform, !Sub and !FindInMap functions.
 
 CrockStack is a work in progress and it's not by any means intended as a full replacement for SAM start-local, so please manage your expectations accordingly.
 
@@ -53,4 +53,4 @@ After launching, you should be able to access your API at localhost:8080.
 
 
 ## Version ##
-The current version is 1.0.6
+The current version is 1.0.7

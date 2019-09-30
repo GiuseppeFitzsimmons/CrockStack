@@ -31,7 +31,7 @@ function startServer() {
     var startStack = loadTemplate(templateName)
     for (i in startStack.Resources){
         let resource = startStack.Resources[i]
-        if (resource.Type == 'AWS::DynamoDB::Table' ){
+        if (resource.Type == 'AWS::DynamoDB::Table' /*|| resource.Type == 'AWS::Serverless::SimpleTable'*/){
             if (parameterOverrides.DymamoDBEndpoint){
                 createTable(startStack, resource)
             }
@@ -98,7 +98,8 @@ function startServer() {
             }
             let lambdaFunction = require(process.cwd() + '/' + lambda.Properties.CodeUri)
             let handler = getHandlerforLambda(stack, lambda)
-            let result = await lambdaFunction[handler](event)
+            var context = {}
+            let result = await lambdaFunction[handler](event, context)
             response.statusCode = result.statusCode
             response.write(result.body)
         } else {
@@ -314,6 +315,16 @@ function resolve(stack, reference) {
                 }
                 return stack.Mappings[newArray[0]][newArray[1]][newArray[2]]
             }
+        } else if (reference._____Sub) {
+                var subValue = reference._____Sub
+                var matches=subValue.match(new RegExp("(\\${.*?})",'g'));
+                for (var i in matches){
+                    var match = matches[i]
+                    let variableNameToResolve=match.replace(new RegExp("\\${(.*?)}"),'$1')
+                    variableNameToResolve = resolve(stack, {_____Ref: variableNameToResolve})
+                    subValue = subValue.replace(match, variableNameToResolve)
+                }
+                return subValue
         }
     }
     return reference

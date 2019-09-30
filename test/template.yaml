@@ -35,7 +35,7 @@ Globals:
         MAP_TEST:
           !FindInMap [ StackMap, !Ref 'AWS::StackName', 'Greeting' ]
         SUB_TEST:
-          !Sub ${AWS::StackName}-sub-test
+          !Sub ${AWS::StackName}-sub-test-${AWS::Region}
         USER_TABLE_NAME: 
           !Join ['-', [!Ref 'AWS::StackName', 'user-table']]
         GLOBAL_ENVIRONMENT_VARIABLE: 12
@@ -121,4 +121,14 @@ Resources:
       BillingMode: PROVISIONED
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
-        
+  ASimpleTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName:
+        !Sub ${AWS::StackName}-simple-table
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5

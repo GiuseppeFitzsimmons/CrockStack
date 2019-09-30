@@ -12,7 +12,7 @@ async function setUp() {
         })
         setTimeout(function () {
             resolve()
-        }, 2000)
+        }, 4000)
     })
 }
 async function tearDown() {
