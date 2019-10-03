@@ -2,6 +2,6 @@
     "Parameters": {
       "BuildVersion": "V4",
       "Greeting": "Buongiorno",
-      "DymamoDBEndpoint": "http://localhost:8000"
+      "DymamoDBEndpointX": "http://localhost:8000"
     }
   }

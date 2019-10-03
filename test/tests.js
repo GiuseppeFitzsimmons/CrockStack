@@ -29,6 +29,7 @@ async function tearDown() {
 async function testEnvVars() {
     const response = await fetch('http://localhost:8080/hello')
     const json = await response.json()
+    console.log(json)
     if (json.version != 'V4'){
         throw new Error()
     } else {

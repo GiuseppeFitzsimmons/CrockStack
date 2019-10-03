@@ -31,8 +31,18 @@ function startServer() {
     var startStack = loadTemplate(templateName)
     for (i in startStack.Resources) {
         let resource = startStack.Resources[i]
-        if (resource.Type == 'AWS::DynamoDB::Table' /*|| resource.Type == 'AWS::Serverless::SimpleTable'*/) {
+        if (resource.Type == 'AWS::DynamoDB::Table') {
             if (parameterOverrides.DymamoDBEndpoint) {
+                createTable(startStack, resource)
+            }
+        } else if (resource.Type == 'AWS::Serverless::SimpleTable') {
+            if (parameterOverrides.DymamoDBEndpoint) {
+                let primaryKey = resource.Properties.PrimaryKey
+                resource.Properties.KeySchema = []
+                resource.Properties.KeySchema.push({ AttributeName: primaryKey.Name, KeyType: 'HASH' })
+                resource.Properties.AttributeDefinitions = []
+                resource.Properties.AttributeDefinitions.push({ AttributeName: primaryKey.Name, AttributeType: primaryKey.Type.charAt(0) })
+                delete resource.Properties.PrimaryKey
                 createTable(startStack, resource)
             }
         }
@@ -122,7 +132,6 @@ function createTable(stack, resource) {
         console.log(`Deleting ${resource.Properties.TableName}, 10 second timeout`)
         execSync('aws dynamodb delete-table --table-name ' + resource.Properties.TableName + ' --endpoint-url ' + parameterOverrides.DymamoDBEndpoint, { timeout: 10000 })
     } catch (err) {
-        console.log(`Unable to contact server within 10 second timeout, do you have an instance of DynamoDB running?`)
     }
     try {
         console.log(`Creating ${resource.Properties.TableName}, 10 second timeout`)
@@ -177,18 +186,20 @@ function getHandlerforLambda(stack, lambda) {
     return handler
 }
 function getLayersforLambda(stack, lambda) {
-    let layers = lambda.Properties.Layers
-    if (!layers && stack.Globals && stack.Globals.Function) {
-        layers = stack.Globals.Function.Layers
-    }
-    if (layers) {
-        var layerObjects = []
-        for (var l in layers) {
-            let layerName = layers[l]
-            layerObjects.push(resolve(stack, layerName))
+    let layerArray = []
+    if (lambda.Properties.Layers) {
+        for (var l in lambda.Properties.Layers) {
+            let layerName = lambda.Properties.Layers[l]
+            layerArray.push(resolve(stack, layerName))
         }
-        return layerObjects
     }
+    if (stack.Globals && stack.Globals.Function && stack.Globals.Function.Layers) {
+        for (var l in stack.Globals.Function.Layers) {
+            let layerName = stack.Globals.Function.Layers[l]
+            layerArray.push(resolve(stack, layerName))
+        }
+    }
+    return layerArray
 }
 function getEnvironmentVariablesforLambda(stack, lambda) {
     let lambdaVariables;
