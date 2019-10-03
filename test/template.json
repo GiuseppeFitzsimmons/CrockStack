@@ -1,0 +1,219 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Transform": "AWS::Serverless-2016-10-31",
+  "Description": "Test template in JSON",
+  "Parameters": {
+    "DomainNameString": {
+      "Description": "The domain name",
+      "Type": "String",
+      "Default": "whatwoulddododo.com"
+    },
+    "BuildVersion": {
+      "Type": "String",
+      "Default": "V1"
+    },
+    "Environment": {
+      "Type": "String",
+      "Default": ""
+    },
+    "Greeting": {
+      "Type": "String",
+      "Default": ""
+    }
+  },
+  "Mappings": {
+    "StackMap": {
+      "CrockStack": {
+        "Greeting": "Hello from CrockStack"
+      },
+      "dev-stack": {
+        "Greeting": "Hello from the Development environment"
+      },
+      "prod-stack": {
+        "Greeting": "Hello from the Production environment"
+      }
+    }
+  },
+  "Globals": {
+    "Function": {
+      "Timeout": 18,
+      "Runtime": "nodejs8.10",
+      "Handler": "index.requestHandler",
+      "Environment": {
+        "Variables": {
+          "MAP_TEST": {
+            "Fn::FindInMap": [
+              "StackMap",
+              null,
+              "Greeting"
+            ]
+          },
+          "SUB_TEST": {
+            "Fn::Sub": "${AWS::StackName}-sub-test-${AWS::Region}"
+          },
+          "USER_TABLE_NAME": {
+            "Fn::Join": [
+              "-",
+              [
+                null,
+                "user-table"
+              ]
+            ]
+          },
+          "GLOBAL_ENVIRONMENT_VARIABLE": 12,
+          "ENVIRONMENT": {
+            "Fn::Ref": "Environment"
+          }
+        }
+      },
+      "Layers": [
+        {
+          "Fn::Ref": "SharedLayer"
+        }
+      ]
+    }
+  },
+  "Resources": {
+    "ApiGateway": {
+      "Type": "AWS::Serverless::Api",
+      "Properties": {
+        "Name": "gateway",
+        "StageName": "dev",
+        "DefinitionBody": {
+          "Fn::Transform": {
+            "Name": "AWS::Include",
+            "Parameters": {
+              "Location": "openapi.json"
+            }
+          }
+        }
+      }
+    },
+    "WwddLambda": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "index.handler",
+        "CodeUri": "askdonald/",
+        "Runtime": "nodejs8.10",
+        "Role": {
+          "Fn::GetAtt": "LambdaExecutionRole.Arn"
+        },
+        "RestApiId": {
+          "Fn::Ref": "ApiGateway"
+        },
+        "Events": {
+          "ApiEventSource": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/askdonald",
+              "Method": "post"
+            }
+          },
+          "ApiEventSource2": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/askdonald",
+              "Method": "get"
+            }
+          }
+        }
+      }
+    },
+    "HelloLambda": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Environment": {
+          "Variables": {
+            "BUILD_VERSION": {
+              "Fn::Ref": "BuildVersion"
+            },
+            "GREETING": {
+              "Fn::Ref": "Greeting"
+            }
+          }
+        },
+        "CodeUri": "hellolambda/",
+        "Runtime": "nodejs8.10",
+        "Role": {
+          "Fn::GetAtt": "LambdaExecutionRole.Arn"
+        },
+        "RestApiId": {
+          "Fn::Ref": "ApiGateway"
+        },
+        "Events": {
+          "ApiEventSource": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/hello",
+              "Method": "any"
+            }
+          }
+        }
+      }
+    },
+    "SharedLayer": {
+      "Type": "AWS::Serverless::LayerVersion",
+      "Properties": {
+        "ContentUri": "sharedlayer/"
+      }
+    },
+    "CrockTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "TableName": {
+          "Fn::Join": [
+            "-",
+            [
+              null,
+              "crock-table"
+            ]
+          ]
+        },
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          },
+          {
+            "AttributeName": "date",
+            "KeyType": "RANGE"
+          }
+        ],
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "date",
+            "AttributeType": "S"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 1,
+          "WriteCapacityUnits": 1
+        },
+        "BillingMode": "PROVISIONED",
+        "PointInTimeRecoverySpecification": {
+          "PointInTimeRecoveryEnabled": true
+        }
+      }
+    },
+    "ASimpleTable": {
+      "Type": "AWS::Serverless::SimpleTable",
+      "Properties": {
+        "TableName": {
+          "Fn::Sub": "${AWS::StackName}-simple-table"
+        },
+        "PrimaryKey": {
+          "Name": "id",
+          "Type": "String"
+        },
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 5
+        }
+      }
+    }
+  }
+}

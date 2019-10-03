@@ -1,0 +1,33 @@
+{
+  "openapi": 3,
+  "paths": {
+    "/askstupid": {
+      "post": {
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WwddLambda.Arn}/invocations"
+          }
+        }
+      },
+      "get": {
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WwddLambda.Arn}/invocations"
+          }
+        }
+      }
+    },
+    "/helloworld/{id}": {
+      "get": {
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HelloLambda.Arn}/invocations"
+          }
+        }
+      }
+    }
+  }
+}

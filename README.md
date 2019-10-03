@@ -16,8 +16,7 @@ This won't work
 But this will
 
     RegionName:
-      !Ref
-        "AWS::Region"
+      !Ref "AWS::Region"
 
 
 * It only implements four resource types: Lambda, Gateway, Layer and DynamoDB (I’ll be adding CustomAuthorizers next, and I'm open to suggestions)
