@@ -44,7 +44,7 @@
           "MAP_TEST": {
             "Fn::FindInMap": [
               "StackMap",
-              null,
+              {"Ref":"AWS::StackName"},
               "Greeting"
             ]
           },
@@ -55,20 +55,20 @@
             "Fn::Join": [
               "-",
               [
-                null,
+                {"Ref":"AWS::StackName"},
                 "user-table"
               ]
             ]
           },
           "GLOBAL_ENVIRONMENT_VARIABLE": 12,
           "ENVIRONMENT": {
-            "Fn::Ref": "Environment"
+            "Ref": "Environment"
           }
         }
       },
       "Layers": [
         {
-          "Fn::Ref": "SharedLayer"
+          "Ref": "SharedLayer"
         }
       ]
     }
@@ -99,7 +99,7 @@
           "Fn::GetAtt": "LambdaExecutionRole.Arn"
         },
         "RestApiId": {
-          "Fn::Ref": "ApiGateway"
+          "Ref": "ApiGateway"
         },
         "Events": {
           "ApiEventSource": {
@@ -125,10 +125,10 @@
         "Environment": {
           "Variables": {
             "BUILD_VERSION": {
-              "Fn::Ref": "BuildVersion"
+              "Ref": "BuildVersion"
             },
             "GREETING": {
-              "Fn::Ref": "Greeting"
+              "Ref": "Greeting"
             }
           }
         },
@@ -138,7 +138,7 @@
           "Fn::GetAtt": "LambdaExecutionRole.Arn"
         },
         "RestApiId": {
-          "Fn::Ref": "ApiGateway"
+          "Ref": "ApiGateway"
         },
         "Events": {
           "ApiEventSource": {
@@ -164,7 +164,7 @@
           "Fn::Join": [
             "-",
             [
-              null,
+              {"Ref":"AWS::StackName"},
               "crock-table"
             ]
           ]

@@ -29,10 +29,10 @@ function startServer() {
         }
     }
     var startStack = loadTemplate(templateName)
-    for (i in startStack.Resources){
+    for (i in startStack.Resources) {
         let resource = startStack.Resources[i]
-        if (resource.Type == 'AWS::DynamoDB::Table' /*|| resource.Type == 'AWS::Serverless::SimpleTable'*/){
-            if (parameterOverrides.DymamoDBEndpoint){
+        if (resource.Type == 'AWS::DynamoDB::Table' /*|| resource.Type == 'AWS::Serverless::SimpleTable'*/) {
+            if (parameterOverrides.DymamoDBEndpoint) {
                 createTable(startStack, resource)
             }
         }
@@ -112,24 +112,26 @@ function startServer() {
     server.listen(_port)
     console.log('Server now listening on port ', _port)
 }
-function createTable(stack, resource){
+function createTable(stack, resource) {
     delete resource.Properties.BillingMode;
     delete resource.Properties.PointInTimeRecoverySpecification;
-    const {execSync} = require ('child_process')
+    const { execSync } = require('child_process')
     resource.Properties.TableName = resolve(stack, resource.Properties.TableName)
-    fs.writeFileSync(resource.Properties.TableName+'.JSON', JSON.stringify(resource.Properties))
+    fs.writeFileSync(resource.Properties.TableName + '.JSON', JSON.stringify(resource.Properties))
     try {
-        execSync('aws dynamodb delete-table --table-name '+resource.Properties.TableName+' --endpoint-url '+parameterOverrides.DymamoDBEndpoint)
-    } catch(err) {
-        
+        console.log(`Deleting ${resource.Properties.TableName}, 10 second timeout`)
+        execSync('aws dynamodb delete-table --table-name ' + resource.Properties.TableName + ' --endpoint-url ' + parameterOverrides.DymamoDBEndpoint, { timeout: 10000 })
+    } catch (err) {
+        console.log(`Unable to contact server within 10 second timeout, do you have an instance of DynamoDB running?`)
     }
     try {
-        execSync('aws dynamodb create-table --cli-input-json file://'+resource.Properties.TableName+'.JSON --endpoint-url '+parameterOverrides.DymamoDBEndpoint)
-    } catch(err) {
-        
+        console.log(`Creating ${resource.Properties.TableName}, 10 second timeout`)
+        execSync('aws dynamodb create-table --cli-input-json file://' + resource.Properties.TableName + '.JSON --endpoint-url ' + parameterOverrides.DymamoDBEndpoint, { timeout: 10000 })
+    } catch (err) {
+        console.log(`Unable to contact server within 10 second timeout, do you have an instance of DynamoDB running?`)
     }
-    fs.unlinkSync(resource.Properties.TableName+'.JSON')
-    
+    fs.unlinkSync(resource.Properties.TableName + '.JSON')
+
 }
 function getLambda(stack, event) {
     for (var i in stack.Resources) {
@@ -218,17 +220,17 @@ function getEnvironmentVariablesforLambda(stack, lambda) {
 }
 function loadTemplate(templateName) {
     let input = fs.readFileSync(process.cwd() + '/' + templateName, 'utf8')
-    /*input = input.replace(new RegExp("Fn\:\:Transform\:", "g"), "_____Transform\:");
-    input = input.replace(new RegExp("\!Transform", "g"), "_____Transform\:");
-    input = input.replace(new RegExp("\: \!(.*?)", "g"), ": _____");
-    input = input.replace(new RegExp("\: Fn\:\:(.*?)\:(.*?)", "g"), ": _____$1");
-    input = input.replace(new RegExp("\- \!(.*?)", "g"), "- _____");
-    input = input.replace(new RegExp("\- Fn\:\:(.*?)\:(.*?)", "g"), "- _____$1");
-    input = input.replace(new RegExp("Fn\:\:(.*?)\:", "g"), "- _____$1");*/
-    input = input.replace(new RegExp("Fn\:\:(.*?)\:(.*?)", "g"), " _____$1:");
-    input = input.replace(new RegExp("\!(.*?) (.*?)", "g"), " _____$1: ");
-    let stack = yaml.load(input)
-    //let stack = YAML.parse(input)
+    let stack;
+    try {
+        input = input.replace(new RegExp("\"Fn\:\:(.*?)\"", "g"), " \"_____$1\"");
+        input = input.replace(new RegExp("\"(Ref)\"\:", "g"), " \"_____$1\":");
+        stack = JSON.parse(input)
+    }
+    catch (err) {
+        input = input.replace(new RegExp("Fn\:\:(.*?)\:(.*?)", "g"), " _____$1:");
+        input = input.replace(new RegExp("\!(.*?) (.*?)", "g"), " _____$1: ");
+        stack = yaml.load(input)
+    }
     for (i in stack.Resources) {
         var resource = stack.Resources[i]
         if (resource.Type == 'AWS::Serverless::Api') {
@@ -238,8 +240,12 @@ function loadTemplate(templateName) {
                     resource.Properties.DefinitionBody._____Transform.Parameters &&
                     resource.Properties.DefinitionBody._____Transform.Parameters.Location) {
                     swaggerString = fs.readFileSync(process.cwd() + '/' + resource.Properties.DefinitionBody._____Transform.Parameters.Location, 'utf8')
-                    //paths = YAML.parse(swaggerString)
-                    paths = yaml.load(swaggerString)
+                    try {
+                        paths = JSON.parse(swaggerString)
+                    }
+                    catch (err) {
+                        paths = yaml.load(swaggerString)
+                    }
                 }
                 if (paths) {
                     for (_p in paths) {
@@ -316,15 +322,15 @@ function resolve(stack, reference) {
                 return stack.Mappings[newArray[0]][newArray[1]][newArray[2]]
             }
         } else if (reference._____Sub) {
-                var subValue = reference._____Sub
-                var matches=subValue.match(new RegExp("(\\${.*?})",'g'));
-                for (var i in matches){
-                    var match = matches[i]
-                    let variableNameToResolve=match.replace(new RegExp("\\${(.*?)}"),'$1')
-                    variableNameToResolve = resolve(stack, {_____Ref: variableNameToResolve})
-                    subValue = subValue.replace(match, variableNameToResolve)
-                }
-                return subValue
+            var subValue = reference._____Sub
+            var matches = subValue.match(new RegExp("(\\${.*?})", 'g'));
+            for (var i in matches) {
+                var match = matches[i]
+                let variableNameToResolve = match.replace(new RegExp("\\${(.*?)}"), '$1')
+                variableNameToResolve = resolve(stack, { _____Ref: variableNameToResolve })
+                subValue = subValue.replace(match, variableNameToResolve)
+            }
+            return subValue
         }
     }
     return reference
