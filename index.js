@@ -63,10 +63,23 @@ function startServer() {
             _path = _path.substring(0, _path.indexOf('?'))
             _queryString = _queryString.substring(_queryString.indexOf('?') + 1)
         }
+        multiQueryStringParameters = querystring.parse(_queryString)
+        if (multiQueryStringParameters) {
+            for (var i in multiQueryStringParameters) {
+                multiQSP = multiQueryStringParameters[i]
+                if (typeof(multiQSP)=='String'){
+                    let multiQSPArray = []
+                    multiQSPArray.push(multiQSP)
+                    multiQueryStringParameters[i] = multiQSPArray
+                }
+            }
+        }
+
         var event = {
             path: _path,
             httpMethod: request.method.toLowerCase(),
             queryStringParameters: querystring.parse(_queryString),
+            multiQueryStringParameters: multiQueryStringParameters,
             headers: request.headers
         }
         if (event.httpMethod == 'put' || event.httpMethod == 'post') {
