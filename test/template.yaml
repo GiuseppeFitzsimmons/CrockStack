@@ -36,8 +36,7 @@ Globals:
           !FindInMap [ StackMap, !Ref 'AWS::StackName', 'Greeting' ]
         SUB_TEST:
           !Sub ${AWS::StackName}-sub-test-${AWS::Region}
-        USER_TABLE_NAME: 
-          !Join ['-', [!Ref 'AWS::StackName', 'user-table']]
+        USER_TABLE_NAME: !Join ['-', [!Ref 'AWS::StackName', 'user-table']]
         GLOBAL_ENVIRONMENT_VARIABLE: 12
         ENVIRONMENT: 
           !Ref Environment

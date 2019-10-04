@@ -48,6 +48,15 @@ function startServer() {
         }
     }
     var answerFunction = async function (request, response) {
+        response.setHeader('Access-Control-Allow-Origin', '*');
+        response.setHeader('Access-Control-Request-Method', '*');
+        response.setHeader('Access-Control-Allow-Methods', '*');
+        response.setHeader('Access-Control-Allow-Headers', '*');
+        if (request.method === 'OPTIONS') {
+            response.writeHead(200);
+            response.end();
+            return;
+        }
         var _path = request.url
         var _queryString = request.url
         if (_path.indexOf('?') > -1) {
@@ -94,7 +103,15 @@ function startServer() {
             if (layers) {
                 for (var l in layers) {
                     let layer = layers[l]
-                    moduleAlias.addPath(process.cwd() + '/' + layer.Properties.ContentUri + 'nodejs')
+                    let contentUri = layer.Properties.ContentUri
+                    if (contentUri.charAt(0) == '/') {
+                        contentUri = contentUri.substring(1)
+                    }
+                    if (contentUri.lastIndexOf('/') == contentUri.length) {
+                        contentUri = contentUri.substring(0, contentUri.length - 1)
+                    }
+                    moduleAlias.addPath(process.cwd() + '/' + contentUri + '/nodejs')
+                    moduleAlias.addPath(process.cwd() + '/' + contentUri + '/nodejs/node_modules')
                 }
             }
             let variables = getEnvironmentVariablesforLambda(stack, lambda)
@@ -106,7 +123,14 @@ function startServer() {
                     }
                 }
             }
-            let lambdaFunction = require(process.cwd() + '/' + lambda.Properties.CodeUri)
+            let codeUri = lambda.Properties.CodeUri
+            if (codeUri.charAt(0) == '/') {
+                codeUri = codeUri.substring(1)
+            }
+            if (codeUri.lastIndexOf('/') == codeUri.length) {
+                codeUri = codeUri.substring(0, codeUri.length - 1)
+            }
+            let lambdaFunction = require(process.cwd() + '/' + codeUri)
             let handler = getHandlerforLambda(stack, lambda)
             var context = {}
             let result = await lambdaFunction[handler](event, context)
@@ -229,6 +253,28 @@ function getEnvironmentVariablesforLambda(stack, lambda) {
     }
     return variablesObjects
 }
+
+function processToYaml(input) {
+    input = input.replace(new RegExp("Fn\:\:(.*?)\:(.*?)", "g"), "_____$1:");
+    input = input.replace(new RegExp("\!(.*?) (.*?)", "g"), "_____$1: ");
+    var inputLines = input.split('\n')
+    var inputString = ''
+    for (var i in inputLines) {
+        var line = inputLines[i]
+        var match = line.match(new RegExp(" *?.*?\: _____(.*?)"))
+        if (match) {
+            let totalSpaces = line.length - line.trimLeft().length
+            let spaces = ''
+            for (var i = 0; i < totalSpaces + 2; i++) {
+                spaces += ' '
+            }
+            line = line.replace(':', ':\n' + spaces)
+        }
+        inputString += line + '\n'
+    }
+    return inputString
+}
+
 function loadTemplate(templateName) {
     let input = fs.readFileSync(process.cwd() + '/' + templateName, 'utf8')
     let stack;
@@ -238,8 +284,9 @@ function loadTemplate(templateName) {
         stack = JSON.parse(input)
     }
     catch (err) {
-        input = input.replace(new RegExp("Fn\:\:(.*?)\:(.*?)", "g"), " _____$1:");
-        input = input.replace(new RegExp("\!(.*?) (.*?)", "g"), " _____$1: ");
+        input = processToYaml(input)
+        //input = input.replace(new RegExp("Fn\:\:(.*?)\:(.*?)", "g"), " _____$1:");
+        //input = input.replace(new RegExp("\!(.*?) (.*?)", "g"), " _____$1: ");
         stack = yaml.load(input)
     }
     for (i in stack.Resources) {

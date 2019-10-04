@@ -1,29 +1,16 @@
 # CrockStack Readme #
-CrockStack is for developers for whom the AWS-SAM start-local with a full-blown Docker image is impractical or impossible.
-It replaces start-local by reading your template.yaml (and any associated openapi.yaml), and exposing your Lambdas on a local http server.
+CrockStack is for developers for whom the AWS-SAM start-api with a full-blown Docker image is impractical or impossible.
+It replaces start-api by reading your template.yaml (and any associated openapi.yaml), and exposing your Lambdas on a local http server.
 
 ## Limitations ##
 CrockStack has many limitations:
 
 * It only supports Node (AWS supports Node, Java, Python and Go).
-* It supports yaml and JSON, and the yaml syntax is very strict. In particular, if you ever see something like "incomplete explicit mapping pair", it probably means that you need to put your function, for instance !Ref, on the next line and indented.
-
-This won't work
-
-    RegionName: !Ref "AWS::Region"
-
-
-But this will
-
-    RegionName:
-      !Ref "AWS::Region"
-
-
 * It only implements four resource types: Lambda, Gateway, Layer and DynamoDB (I’ll be adding CustomAuthorizers next, and I'm open to suggestions)
     * For DynamoDB support, you need a local instance running, and need to pass a parameter called "DymamoDBEndpoint" using "--env-vars" or "--parameter-overrides".
 * It supports the !Ref, !Join, !Transform, !Sub and !FindInMap functions.
 
-CrockStack is a work in progress and it's not by any means intended as a full replacement for SAM start-local, so please manage your expectations accordingly.
+CrockStack is a work in progress and it's not by any means intended as a full replacement for SAM start-api, so please manage your expectations accordingly.
 
 ## Usage ##
 
@@ -52,4 +39,4 @@ After launching, you should be able to access your API at localhost:8080.
 
 
 ## Version ##
-The current version is 1.0.8
+The current version is 1.0.10
