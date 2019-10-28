@@ -97,7 +97,7 @@ function startServer() {
             if (!contentType) {
                 contentType = event.headers['Content-Type']
             }
-            if (contentType.toLowerCase().indexOf('multipart/form-data') == 0) {
+            if (contentType && contentType.toLowerCase().indexOf('multipart/form-data') == 0) {
                 event.body = Buffer.from(contents).toString('base64');
                 event.isBase64Encoded = true
             } else {
@@ -360,7 +360,7 @@ function resolve(stack, reference) {
             if (parameterOverrides[reference._____Ref]) {
                 return parameterOverrides[reference._____Ref]
             }
-            if (stack.Parameters[reference._____Ref]) {
+            if (stack.Parameters && stack.Parameters[reference._____Ref]) {
                 return stack.Parameters[reference._____Ref].Default
             }
             return stack.Resources[reference._____Ref]

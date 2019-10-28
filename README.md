@@ -1,9 +1,9 @@
 # CrockStack Readme #
 CrockStack is for developers for whom the AWS-SAM start-api with a full-blown Docker image is impractical or impossible.
-It replaces start-api by reading your template.yaml (and any associated openapi.yaml), and exposing your Lambdas on a local http server.
+It replaces start-api by reading your template.yaml or template.json (and any associated openapi.yaml or openapi.json), and exposing your Lambdas on a local http server.
 
 ## Limitations ##
-CrockStack has many limitations:
+CrockStack has some limitations:
 
 * It only supports Node (AWS supports Node, Java, Python and Go).
 * It only implements four resource types: Lambda, Gateway, Layer and DynamoDB (I’ll be adding CustomAuthorizers next, and I'm open to suggestions)
@@ -39,4 +39,4 @@ After launching, you should be able to access your API at localhost:8080.
 
 
 ## Version ##
-The current version is 1.0.12
+The current version is 1.0.13
