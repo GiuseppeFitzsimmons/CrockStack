@@ -147,8 +147,18 @@ function startServer() {
             let handler = getHandlerforLambda(stack, lambda)
             var context = {}
             let result = await lambdaFunction[handler](event, context)
+            if (result.headers){
+                let headers = Object.keys(result.headers)
+                for (var i in headers){
+                    let header = headers[i]
+                    let value = result.headers[header]
+                    response.setHeader(header, value);
+                }
+            }
             response.statusCode = result.statusCode
-            response.write(result.body)
+            if (result.body){
+                response.write(result.body)
+            }
         } else {
             response.statusCode = 401
             response.write(JSON.stringify({ message: 'Unauthorized' }))
