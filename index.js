@@ -146,8 +146,29 @@ function startServer() {
             let lambdaFunction = require(process.cwd() + '/' + codeUri)
             let handler = getHandlerforLambda(stack, lambda)
             var context = {}
-            console.log("AM I ASYCHRON", lambdaFunction[handler].constructor.name)
-            let result = await lambdaFunction[handler](event, context)
+            let result;
+            if (lambdaFunction[handler].constructor.name==='AsyncFunction') {
+                result = await lambdaFunction[handler](event, context)
+            } else {
+                result = await new Promise( (resolve, reject)=>{
+                    context.done=(reply)=>{
+                        resolve(reply);
+                    }
+                    context.success=(reply)=>{
+                        resolve(reply);
+                    }
+                    context.fail=(reply)=>{
+                        reject({failed:true, reply});
+                    }
+                    lambdaFunction[handler](event, context, function(err, reply) {
+                        if (err) {
+                            context.fail(err);
+                        } else {
+                            context.success(reply);
+                        }
+                    })
+                })
+            }
             if (result.headers){
                 let headers = Object.keys(result.headers)
                 for (var i in headers){

@@ -15,6 +15,6 @@ function handler(event, context, callback) {
         mapGreeting: process.env.MAP_TEST,
         region: process.env.SUB_TEST
     })
-    return returnObject
+    callback(null, returnObject)
 }
 exports.handler=handler

@@ -1,4 +1,4 @@
 function helper(){
-    return 'helperstring'
+    return 'helperstring from layer'
 }
 module.exports = {helper}
