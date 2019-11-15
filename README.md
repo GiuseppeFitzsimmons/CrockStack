@@ -12,6 +12,8 @@ CrockStack has some limitations:
 
 CrockStack is a work in progress and it's not by any means intended as a full replacement for SAM start-api, so please manage your expectations accordingly.
 
+As of version 1.1.1, CrockStack supports synchronous functions, including context (including the deprecated functions done, success and fail) and callbacks.
+
 ## Usage ##
 
     npm install crockstack
@@ -39,4 +41,4 @@ After launching, you should be able to access your API at localhost:8080.
 
 
 ## Version ##
-The current version is 1.1.0
+The current version is 1.1.1
