@@ -95,6 +95,29 @@ Resources:
           Properties:
             Path: /hello
             Method: any
+  
+  HelloLambdaSync:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Environment:
+        Variables:
+          BUILD_VERSION: 
+            !Ref BuildVersion
+          GREETING:
+            !Ref Greeting
+      CodeUri: hellolambda-sync
+      Runtime: nodejs8.10
+      Role: 
+        !GetAtt LambdaExecutionRole.Arn
+      RestApiId: 
+        !Ref ApiGateway
+      Events:
+        ApiEventSource:
+          Type: Api
+          Properties:
+            Path: /hello-sync
+            Method: any
   SharedLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:

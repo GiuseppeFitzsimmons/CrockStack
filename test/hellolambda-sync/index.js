@@ -1,0 +1,20 @@
+/*
+HelloLambda exists to test aspects of CrockStack.
+*/
+
+const { helper } = require('helper')
+
+function handler(event, context, callback) {
+    let returnObject = {}
+    returnObject.statusCode = 200
+    returnObject.body = JSON.stringify({ version: process.env.BUILD_VERSION, 
+        environment: process.env.ENVIRONMENT, 
+        greeting:process.env.GREETING, 
+        helper: helper(),
+        userTable: process.env.USER_TABLE_NAME,
+        mapGreeting: process.env.MAP_TEST,
+        region: process.env.SUB_TEST
+    })
+    return returnObject
+}
+exports.handler=handler

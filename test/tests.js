@@ -37,9 +37,21 @@ async function testEnvVars() {
     }
     return
 }
+async function testSynchronousEnvVars() {
+    const response = await fetch('http://localhost:8080/hello-sync')
+    const json = await response.json()
+    console.log(json)
+    if (json.version != 'V4'){
+        throw new Error()
+    } else {
+        console.log('testSynchronousEnvVars passed')
+    }
+    return
+}
 async function runTests() {
     await setUp()
     await testEnvVars()
+    await testSynchronousEnvVars()
     tearDown()
 }
 

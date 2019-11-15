@@ -146,6 +146,7 @@ function startServer() {
             let lambdaFunction = require(process.cwd() + '/' + codeUri)
             let handler = getHandlerforLambda(stack, lambda)
             var context = {}
+            console.log("AM I ASYCHRON", lambdaFunction[handler].constructor.name)
             let result = await lambdaFunction[handler](event, context)
             if (result.headers){
                 let headers = Object.keys(result.headers)
