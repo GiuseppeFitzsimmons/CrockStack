@@ -150,24 +150,34 @@ function startServer() {
             if (lambdaFunction[handler].constructor.name==='AsyncFunction') {
                 result = await lambdaFunction[handler](event, context)
             } else {
-                result = await new Promise( (resolve, reject)=>{
-                    context.done=(reply)=>{
-                        resolve(reply);
+                let syncReply = await new Promise( (resolve, reject)=>{
+                    context.done=(error, reply)=>{
+                        resolve({error, reply});
                     }
                     context.success=(reply)=>{
-                        resolve(reply);
+                        resolve({reply});
                     }
-                    context.fail=(reply)=>{
-                        reject({failed:true, reply});
+                    context.fail=(error)=>{
+                        if (!error) {
+                            error={}
+                        }
+                        resolve({error});
                     }
                     lambdaFunction[handler](event, context, function(err, reply) {
-                        if (err) {
-                            context.fail(err);
-                        } else {
-                            context.success(reply);
-                        }
+                        context.done(err, reply);
                     })
                 })
+                if (syncReply.error) {
+                    result=syncReply.error;
+                    if (!result.statusCode) {
+                        result.statusCode=400;
+                    }
+                } else {
+                    result=syncReply.reply;
+                    if (!result.statusCode) {
+                        result.statusCode=200;
+                    }
+                }
             }
             if (result.headers){
                 let headers = Object.keys(result.headers)
