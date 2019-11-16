@@ -7,6 +7,7 @@ const { helper } = require('helper')
 function handler(event, context, callback) {
     let returnObject = {}
     returnObject.statusCode = 200
+    returnObject.informationThatWontBeReturned=1000;
     returnObject.body = JSON.stringify({ version: process.env.BUILD_VERSION, 
         environment: process.env.ENVIRONMENT, 
         greeting:process.env.GREETING, 
@@ -15,6 +16,10 @@ function handler(event, context, callback) {
         mapGreeting: process.env.MAP_TEST,
         region: process.env.SUB_TEST
     })
-    callback(null, returnObject)
+    if (event.queryStringParameters.useContext) {
+        context.succeed(returnObject.body);
+    } else {
+        callback(null, returnObject)
+    }
 }
 exports.handler=handler

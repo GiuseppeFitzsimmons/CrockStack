@@ -154,7 +154,7 @@ function startServer() {
                     context.done=(error, reply)=>{
                         resolve({error, reply});
                     }
-                    context.success=(reply)=>{
+                    context.succeed=(reply)=>{
                         resolve({reply});
                     }
                     context.fail=(error)=>{
@@ -167,16 +167,19 @@ function startServer() {
                         context.done(err, reply);
                     })
                 })
-                if (syncReply.error) {
-                    result=syncReply.error;
-                    if (!result.statusCode) {
-                        result.statusCode=400;
-                    }
-                } else {
+                if (syncReply.reply && (syncReply.reply.body || syncReply.reply.statusCode)) {
                     result=syncReply.reply;
                     if (!result.statusCode) {
                         result.statusCode=200;
                     }
+                } else if (syncReply.error) {
+                    let _body=typeof(syncReply.error)=='object' ? JSON.stringify(syncReply.error) : syncReply.error;
+                    result={body:_body};
+                    result.statusCode=400;
+                } else {
+                    let _body=typeof(syncReply.reply)=='object' ? JSON.stringify(syncReply.reply) : syncReply.reply;
+                    result={body:_body};
+                    result.statusCode=200;
                 }
             }
             if (result.headers){

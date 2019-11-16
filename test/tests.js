@@ -48,10 +48,22 @@ async function testSynchronousEnvVars() {
     }
     return
 }
+async function testSynchronousContextEnvVars() {
+    const response = await fetch('http://localhost:8080/hello-sync?useContext=true')
+    const json = await response.json()
+    console.log(json)
+    if (json.version != 'V4'){
+        throw new Error()
+    } else {
+        console.log('testSynchronousContextEnvVars passed')
+    }
+    return
+}
 async function runTests() {
     await setUp()
     await testEnvVars()
     await testSynchronousEnvVars()
+    await testSynchronousContextEnvVars()
     tearDown()
 }
 
