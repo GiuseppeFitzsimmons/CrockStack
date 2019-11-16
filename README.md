@@ -41,4 +41,4 @@ After launching, you should be able to access your API at localhost:8080.
 
 
 ## Version ##
-The current version is 1.1.1
+The current version is 1.1.2
