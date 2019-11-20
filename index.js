@@ -26,17 +26,20 @@ function startServer() {
             let fileContents = fs.readFileSync(process.cwd() + '/' + fileName, 'utf8')
             let parsedContents = JSON.parse(fileContents)
             Object.assign(parameterOverrides, parsedContents.Parameters)
+            if (parameterOverrides.DymamoDbEndpoint){
+                parameterOverrides.DynamoDbEndpoint = parameterOverrides.DymamoDbEndpoint
+            }
         }
     }
     var startStack = loadTemplate(templateName)
     for (i in startStack.Resources) {
         let resource = startStack.Resources[i]
         if (resource.Type == 'AWS::DynamoDB::Table') {
-            if (parameterOverrides.DymamoDBEndpoint) {
+            if (parameterOverrides.DynamoDbEndpoint) {
                 createTable(startStack, resource)
             }
         } else if (resource.Type == 'AWS::Serverless::SimpleTable') {
-            if (parameterOverrides.DymamoDBEndpoint) {
+            if (parameterOverrides.DynamoDbEndpoint) {
                 let primaryKey = resource.Properties.PrimaryKey
                 resource.Properties.KeySchema = []
                 resource.Properties.KeySchema.push({ AttributeName: primaryKey.Name, KeyType: 'HASH' })
@@ -212,12 +215,12 @@ function createTable(stack, resource) {
     fs.writeFileSync(resource.Properties.TableName + '.JSON', JSON.stringify(resource.Properties))
     try {
         console.log(`Deleting ${resource.Properties.TableName}, 10 second timeout`)
-        execSync('aws dynamodb delete-table --table-name ' + resource.Properties.TableName + ' --endpoint-url ' + parameterOverrides.DymamoDBEndpoint, { timeout: 10000 })
+        execSync('aws dynamodb delete-table --table-name ' + resource.Properties.TableName + ' --endpoint-url ' + parameterOverrides.DynamoDbEndpoint, { timeout: 10000 })
     } catch (err) {
     }
     try {
         console.log(`Creating ${resource.Properties.TableName}, 10 second timeout`)
-        execSync('aws dynamodb create-table --cli-input-json file://' + resource.Properties.TableName + '.JSON --endpoint-url ' + parameterOverrides.DymamoDBEndpoint, { timeout: 10000 })
+        execSync('aws dynamodb create-table --cli-input-json file://' + resource.Properties.TableName + '.JSON --endpoint-url ' + parameterOverrides.DynamoDbEndpoint, { timeout: 10000 })
     } catch (err) {
         console.log(`Unable to contact server within 10 second timeout, do you have an instance of DynamoDB running?`)
     }
