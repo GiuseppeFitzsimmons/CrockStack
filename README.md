@@ -7,12 +7,12 @@ CrockStack has some limitations:
 
 * It only supports Node (AWS supports Node, Java, Python and Go).
 * It only implements four resource types: Lambda, Gateway, Layer and DynamoDB (I’ll be adding CustomAuthorizers next, and I'm open to suggestions)
-    * For DynamoDB support, you need a local instance running, and need to pass a parameter called "DymamoDBEndpoint" using "--env-vars" or "--parameter-overrides".
+    * For DynamoDB support, you need a local instance running, and need to pass a parameter called "DynamoDbEndpoint" using "--env-vars" or "--parameter-overrides".
 * It supports the !Ref, !Join, !Transform, !Sub and !FindInMap functions.
 
 CrockStack is a work in progress and it's not by any means intended as a full replacement for SAM start-api, so please manage your expectations accordingly.
 
-As of version 1.1.1, CrockStack supports synchronous functions, including context (including the deprecated functions done, success and fail) and callbacks.
+As of version 1.1.1, CrockStack supports synchronous functions, including context (including the deprecated functions done, succeed and fail) and callbacks.
 
 ## Usage ##
 
@@ -41,4 +41,4 @@ After launching, you should be able to access your API at localhost:8080.
 
 
 ## Version ##
-The current version is 1.1.2
+The current version is 1.1.4

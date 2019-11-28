@@ -16,7 +16,7 @@ function startServer() {
             templateName = process.argv[i * 1 + 1]
         } else if (process.argv[i] == '--parameter-overrides') {
             let _string = process.argv[i * 1 + 1]
-            let _splitted = _string.split(',')
+            let _splitted = _string.split(' ')
             for (var i in _splitted) {
                 var _splits = _splitted[i].split('=')
                 parameterOverrides[_splits[0].trim()] = _splits[1].trim()
