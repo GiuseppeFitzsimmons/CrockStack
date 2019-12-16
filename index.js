@@ -85,8 +85,8 @@ function startServer() {
             multiQueryStringParameters: multiQueryStringParameters,
             headers: request.headers
         }
-        if (event.httpMethod == 'put' || event.httpMethod == 'post') {
-
+        if (event.httpMethod == 'put' || event.httpMethod == 'post' || event.httpMethod == 'delete') {
+            
             var contents = await new Promise((resolve, reject) => {
                 let byteArray = [];
                 request.on('data', (chunk) => {
@@ -110,7 +110,6 @@ function startServer() {
                     event.body = querystring.parse(contents)
                 }
             }
-
         }
         let stack = loadTemplate(templateName)
         let lambda = getLambda(stack, event)
