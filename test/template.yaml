@@ -170,7 +170,7 @@ Resources:
       Target: !Join
         - '/'
         - - 'integrations'
-          - !Ref ConnectInteg
+          - !Ref ConnectIntegration
   ConnectIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
