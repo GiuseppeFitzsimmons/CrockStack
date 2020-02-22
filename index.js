@@ -26,7 +26,7 @@ function startServer() {
             let fileContents = fs.readFileSync(process.cwd() + '/' + fileName, 'utf8')
             let parsedContents = JSON.parse(fileContents)
             Object.assign(parameterOverrides, parsedContents.Parameters)
-            if (parameterOverrides.DymamoDbEndpoint){
+            if (parameterOverrides.DymamoDbEndpoint) {
                 parameterOverrides.DynamoDbEndpoint = parameterOverrides.DymamoDbEndpoint
             }
         }
@@ -70,7 +70,7 @@ function startServer() {
         if (multiQueryStringParameters) {
             for (var i in multiQueryStringParameters) {
                 multiQSP = multiQueryStringParameters[i]
-                if (typeof(multiQSP)=='String'){
+                if (typeof (multiQSP) == 'String') {
                     let multiQSPArray = []
                     multiQSPArray.push(multiQSP)
                     multiQueryStringParameters[i] = multiQSPArray
@@ -86,7 +86,7 @@ function startServer() {
             headers: request.headers
         }
         if (event.httpMethod == 'put' || event.httpMethod == 'post' || event.httpMethod == 'delete') {
-            
+
             var contents = await new Promise((resolve, reject) => {
                 let byteArray = [];
                 request.on('data', (chunk) => {
@@ -149,51 +149,51 @@ function startServer() {
             let handler = getHandlerforLambda(stack, lambda)
             var context = {}
             let result;
-            if (lambdaFunction[handler].constructor.name==='AsyncFunction') {
+            if (lambdaFunction[handler].constructor.name === 'AsyncFunction') {
                 result = await lambdaFunction[handler](event, context)
             } else {
-                let syncReply = await new Promise( (resolve, reject)=>{
-                    context.done=(error, reply)=>{
-                        resolve({error, reply});
+                let syncReply = await new Promise((resolve, reject) => {
+                    context.done = (error, reply) => {
+                        resolve({ error, reply });
                     }
-                    context.succeed=(reply)=>{
-                        resolve({reply});
+                    context.succeed = (reply) => {
+                        resolve({ reply });
                     }
-                    context.fail=(error)=>{
+                    context.fail = (error) => {
                         if (!error) {
-                            error={}
+                            error = {}
                         }
-                        resolve({error});
+                        resolve({ error });
                     }
-                    lambdaFunction[handler](event, context, function(err, reply) {
+                    lambdaFunction[handler](event, context, function (err, reply) {
                         context.done(err, reply);
                     })
                 })
                 if (syncReply.reply && (syncReply.reply.body || syncReply.reply.statusCode)) {
-                    result=syncReply.reply;
+                    result = syncReply.reply;
                     if (!result.statusCode) {
-                        result.statusCode=200;
+                        result.statusCode = 200;
                     }
                 } else if (syncReply.error) {
-                    let _body=typeof(syncReply.error)=='object' ? JSON.stringify(syncReply.error) : syncReply.error;
-                    result={body:_body};
-                    result.statusCode=400;
+                    let _body = typeof (syncReply.error) == 'object' ? JSON.stringify(syncReply.error) : syncReply.error;
+                    result = { body: _body };
+                    result.statusCode = 400;
                 } else {
-                    let _body=typeof(syncReply.reply)=='object' ? JSON.stringify(syncReply.reply) : syncReply.reply;
-                    result={body:_body};
-                    result.statusCode=200;
+                    let _body = typeof (syncReply.reply) == 'object' ? JSON.stringify(syncReply.reply) : syncReply.reply;
+                    result = { body: _body };
+                    result.statusCode = 200;
                 }
             }
-            if (result.headers){
+            if (result.headers) {
                 let headers = Object.keys(result.headers)
-                for (var i in headers){
+                for (var i in headers) {
                     let header = headers[i]
                     let value = result.headers[header]
                     response.setHeader(header, value);
                 }
             }
             response.statusCode = result.statusCode
-            if (result.body){
+            if (result.body) {
                 response.write(result.body)
             }
         } else {
@@ -202,9 +202,17 @@ function startServer() {
         }
         response.end()
     }
+    if (startStack.Resources) {
+        for (var i in startStack.Resources) {
+            if (startStack.Resources[i].Type == 'AWS::ApiGatewayV2::Api') {
+                startWebSocket(startStack.Resources[i], startStack)
+            }
+        }
+    }
     var server = http.createServer(answerFunction)
     server.listen(_port)
     console.log('Server now listening on port ', _port)
+
 }
 function createTable(stack, resource) {
     delete resource.Properties.BillingMode;
@@ -452,6 +460,39 @@ function resolve(stack, reference) {
         }
     }
     return reference
+}
+async function startWebSocket(apiGatewayV2, stack) {
+    console.log('Starting WebSocket')
+    const WebSocket = require('ws');
+
+    const wss = new WebSocket.Server({ port: 9090 });
+
+    wss.on('connection', function connection(ws) {
+        ws.on('message', function incoming(message) {
+            console.log('received: %s', message);
+            console.log('apiGatewayV2.Properties.RouteSelectionExpression', apiGatewayV2.Properties.RouteSelectionExpression)
+            let key = apiGatewayV2.Properties.RouteSelectionExpression.replace('$request.body.', '')
+            let request = JSON.parse(message)
+            let route = request.body[key]
+            console.log('route', route)
+            let routeResource = findResource(stack, 'AWS::ApiGatewayV2::Route', 'OperationName', route)
+            console.log('routeResource', routeResource)
+            let integrationResourceName = routeResource.Properties.Target.split('/')
+            integrationResourceName = integrationResourceName[integrationResourceName.length-1]
+            let integrationResource = stack.Resources[integrationResourceName]
+            console.log('integrationResource', integrationResource)
+        });
+
+        ws.send('something');
+    });
+}
+function findResource(stack, type, propertyName, propertyValue) {
+    for (var i in stack.Resources) {
+        let resource = stack.Resources[i]
+        if (resource.Type == type && resource.Properties && resource.Properties[propertyName] && resource.Properties[propertyName] == propertyValue) {
+            return resource
+        }
+    }
 }
 //startServer()
 module.exports = { startServer }

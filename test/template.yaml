@@ -167,10 +167,7 @@ Resources:
       RouteKey: $connect
       AuthorizationType: NONE
       OperationName: ConnectRoute
-      Target: !Join
-        - '/'
-        - - 'integrations'
-          - !Ref ConnectIntegration
+      Target: '/integrations/ConnectIntegration'
   ConnectIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
