@@ -1,13 +1,11 @@
-const querystring = require('querystring')
-const { loadTemplate } = require('./templateLoader')
-const { resolve } = require('./resolveFunction')
+const querystring = require('querystring');
 var moduleAlias = require('module-alias')
 
-var templateName
+var stack
 
 
-function getAnswerFunction(tn) {
-    templateName = tn
+function getAnswerFunction(s) {
+    stack=s;
     return answerFunction
 }
 
@@ -72,10 +70,9 @@ var answerFunction = async function (request, response) {
             }
         }
     }
-    let stack = loadTemplate(templateName)
-    let lambda = getLambda(stack, event)
+    let lambda = stack.getLambda(event);
     if (lambda) {
-        let layers = getLayersforLambda(stack, lambda)
+        let layers = stack.getLayersforLambda(lambda)
         if (layers) {
             for (var l in layers) {
                 let layer = layers[l]
@@ -90,7 +87,7 @@ var answerFunction = async function (request, response) {
                 moduleAlias.addPath(process.cwd() + '/' + contentUri + '/nodejs/node_modules')
             }
         }
-        let variables = getEnvironmentVariablesforLambda(stack, lambda)
+        let variables = stack.getEnvironmentVariablesforLambda(lambda)
         if (variables) {
             for (var v in variables) {
                 let variable = variables[v]
@@ -107,7 +104,7 @@ var answerFunction = async function (request, response) {
             codeUri = codeUri.substring(0, codeUri.length - 1)
         }
         let lambdaFunction = require(process.cwd() + '/' + codeUri)
-        let handler = getHandlerforLambda(stack, lambda)
+        let handler = stack.getHandlerforLambda(lambda)
         var context = {}
         let result;
         if (lambdaFunction[handler].constructor.name === 'AsyncFunction') {
@@ -164,92 +161,5 @@ var answerFunction = async function (request, response) {
     response.end()
 }
 
-function getLambda(stack, event) {
-    for (var i in stack.Resources) {
-        let resource = stack.Resources[i]
-        if (resource.Type == 'AWS::Serverless::Function' && resource.Properties.CodeUri) {
-            for (var j in resource.Properties.Events) {
-                let resourceEvent = resource.Properties.Events[j]
-                if (resourceEvent.Type == 'Api'
-                    && (resourceEvent.Properties.Method == event.httpMethod
-                        || resourceEvent.Properties.Method == 'any')
-                ) {
-                    let incomingPath = event.path.split('/')
-                    let lambdaPath = resourceEvent.Properties.Path.split('/')
-                    let pathMatch = true
-                    if (incomingPath.length == lambdaPath.length) {
-                        for (var _index in incomingPath) {
-                            if (incomingPath[_index] != lambdaPath[_index] &&
-                                (lambdaPath[_index].indexOf('{') != 0 ||
-                                    lambdaPath[_index].lastIndexOf('}') != lambdaPath[_index].length - 1)) {
-                                pathMatch = false
-                                break
-                            }
-                        }
-                    } else {
-                        pathMatch = false
-                    }
-                    if (pathMatch) {
-                        return resource
-                    }
-                }
-            }
-        }
-    }
-}
-function getHandlerforLambda(stack, lambda) {
-    let handler = lambda.Properties.Handler
-    if (!handler && stack.Globals && stack.Globals.Function) {
-        handler = stack.Globals.Function.Handler
-    }
-    if (handler && handler.indexOf('.') > -1) {
-        handler = handler.substring(handler.indexOf('.') + 1)
-    }
-    return handler
-}
-function getLayersforLambda(stack, lambda) {
-    let layerArray = []
-    if (lambda.Properties.Layers) {
-        for (var l in lambda.Properties.Layers) {
-            let layerName = lambda.Properties.Layers[l]
-            layerArray.push(resolve(stack, layerName))
-        }
-    }
-    if (stack.Globals && stack.Globals.Function && stack.Globals.Function.Layers) {
-        for (var l in stack.Globals.Function.Layers) {
-            let layerName = stack.Globals.Function.Layers[l]
-            layerArray.push(resolve(stack, layerName))
-        }
-    }
-    return layerArray
-}
-function getEnvironmentVariablesforLambda(stack, lambda) {
-    let lambdaVariables;
-    let globalVariables;
-    if (stack.Globals && stack.Globals.Function && stack.Globals.Function.Environment.Variables) {
-        globalVariables = stack.Globals.Function.Environment.Variables
-    }
-    if (lambda.Properties.Environment && lambda.Properties.Environment.Variables) {
-        lambdaVariables = lambda.Properties.Environment.Variables
-    }
-    var variablesObjects = []
-    if (lambdaVariables) {
-        for (var v in lambdaVariables) {
-            let variablesName = lambdaVariables[v]
-            let variable = {}
-            variable[v] = resolve(stack, variablesName)
-            variablesObjects.push(variable)
-        }
-    }
-    if (globalVariables) {
-        for (var v in globalVariables) {
-            let variablesName = globalVariables[v]
-            let variable = {}
-            variable[v] = resolve(stack, variablesName)
-            variablesObjects.push(variable)
-        }
-    }
-    return variablesObjects
-}
 
 module.exports = { answerFunction, getAnswerFunction }

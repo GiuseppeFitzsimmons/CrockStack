@@ -1,10 +1,11 @@
-const fs = require('fs')
-var http = require('http')
-const parameterOverrides = { 'AWS::StackName': 'CrockStack', 'AWS::Region': 'local' }
-const { getAnswerFunction } = require('./gatewayAnswer')
-const { loadTemplate } = require('./templateLoader')
-const { resolve } = require('./resolveFunction')
-const { websocketAnswer } = require('./websocketAnswer')
+const fs = require('fs');
+var http = require('http');
+const parameterOverrides = { 'AWS::StackName': 'CrockStack', 'AWS::Region': 'local' };
+const { getAnswerFunction } = require('./gatewayAnswer');
+const { loadTemplate } = require('./templateLoader');
+//const { resolveParameter } = require('./resolveFunction');
+const { websocketAnswer } = require('./websocketAnswer');
+const WebSocket = require('ws');
 
 function startServer() {
     var templateName = 'template.yaml'
@@ -24,19 +25,19 @@ function startServer() {
         } else if (process.argv[i] == '--env-vars') {
             let fileName = process.argv[i * 1 + 1]
             let fileContents = fs.readFileSync(process.cwd() + '/' + fileName, 'utf8')
-            let parsedContents = JSON.parse(fileContents)
-            Object.assign(parameterOverrides, parsedContents.Parameters)
+            let parsedContents = JSON.parse(fileContents);
+            Object.assign(parameterOverrides, parsedContents.Parameters);
             if (parameterOverrides.DymamoDbEndpoint) {
                 parameterOverrides.DynamoDbEndpoint = parameterOverrides.DymamoDbEndpoint
             }
         }
     }
-    var startStack = loadTemplate(templateName)
-    for (i in startStack.Resources) {
-        let resource = startStack.Resources[i]
+    var stack = loadTemplate(templateName, parameterOverrides)
+    for (i in stack.Resources) {
+        let resource = stack.Resources[i]
         if (resource.Type == 'AWS::DynamoDB::Table') {
             if (parameterOverrides.DynamoDbEndpoint) {
-                createTable(startStack, resource)
+                createTable(stack, resource)
             }
         } else if (resource.Type == 'AWS::Serverless::SimpleTable') {
             if (parameterOverrides.DynamoDbEndpoint) {
@@ -46,18 +47,18 @@ function startServer() {
                 resource.Properties.AttributeDefinitions = []
                 resource.Properties.AttributeDefinitions.push({ AttributeName: primaryKey.Name, AttributeType: primaryKey.Type.charAt(0) })
                 delete resource.Properties.PrimaryKey
-                createTable(startStack, resource)
+                createTable(stack, resource)
             }
         }
     }
-    if (startStack.Resources) {
-        for (var i in startStack.Resources) {
-            if (startStack.Resources[i].Type == 'AWS::ApiGatewayV2::Api') {
-                startWebSocket(startStack.Resources[i], startStack)
+    if (stack.Resources) {
+        for (var i in stack.Resources) {
+            if (stack.Resources[i].Type == 'AWS::ApiGatewayV2::Api') {
+                startWebSocket(stack.Resources[i], stack)
             }
         }
     }
-    let af = getAnswerFunction(templateName)
+    let af = getAnswerFunction(stack)
     var server = http.createServer(af)
     server.listen(_port)
     console.log('Server now listening on port ', _port)
@@ -67,7 +68,7 @@ function createTable(stack, resource) {
     delete resource.Properties.BillingMode;
     delete resource.Properties.PointInTimeRecoverySpecification;
     const { execSync } = require('child_process')
-    resource.Properties.TableName = resolve(stack, resource.Properties.TableName)
+    resource.Properties.TableName = resolveParameter(stack, resource.Properties.TableName, parameterOverrides)
     fs.writeFileSync(resource.Properties.TableName + '.JSON', JSON.stringify(resource.Properties))
     try {
         console.log(`Deleting ${resource.Properties.TableName}, 10 second timeout`)
@@ -90,7 +91,6 @@ function makeUID(){
 
 async function startWebSocket(apiGatewayV2, stack) {
     console.log('Starting WebSocket')
-    const WebSocket = require('ws');
 
     const wss = new WebSocket.Server({ port: 9090 });
     const connections = {}
