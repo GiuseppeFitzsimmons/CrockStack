@@ -10,7 +10,7 @@ function handler(event, context, callback) {
     returnObject.statusCode = 200;
     var params = {
         ClientContext: "MyApp",
-        FunctionName: "MyFunction",
+        FunctionName: "HelloLambda",
         InvocationType: "Event",
         LogType: "Tail",
         Payload: { "some": "thing" },
@@ -24,3 +24,5 @@ function handler(event, context, callback) {
         }
     });
 }
+
+exports.handler=handler

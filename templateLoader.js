@@ -1,5 +1,6 @@
-const fs = require('fs')
-const yaml = require('js-yaml')
+const fs = require('fs');
+const yaml = require('js-yaml');
+var moduleAlias = require('module-alias');
 
 function loadTemplate(templateName, parameterOverrides) {
     let input = fs.readFileSync(process.cwd() + '/' + templateName, 'utf8')
@@ -65,12 +66,13 @@ function loadTemplate(templateName, parameterOverrides) {
             }
         }
     }
-    stack.getLambda=getLambda;
-    stack.getHandlerforLambda=getHandlerforLambda;
-    stack.getLayersforLambda=getLayersforLambda;
-    stack.getEnvironmentVariablesforLambda=getEnvironmentVariablesforLambda;
-    stack.resolveParameter=resolveParameter;
-    stack.parameterOverrides=parameterOverrides;
+    stack.getLambda = getLambda;
+    stack.getHandlerforLambda = getHandlerforLambda;
+    stack.getLayersforLambda = getLayersforLambda;
+    stack.getEnvironmentVariablesforLambda = getEnvironmentVariablesforLambda;
+    stack.resolveParameter = resolveParameter;
+    stack.prepareLambdaForExecution = prepareLambdaForExecution;
+    stack.parameterOverrides = parameterOverrides;
     return stack
 }
 
@@ -107,6 +109,46 @@ function getLambda(event) {
         }
     }
 }
+function prepareLambdaForExecution(lambda) {
+
+    let layers = this.getLayersforLambda(lambda);
+    console.log("layers", layers);
+    if (layers) {
+        for (var l in layers) {
+            let layer = layers[l]
+            let contentUri = layer.Properties.ContentUri
+            if (contentUri.charAt(0) == '/') {
+                contentUri = contentUri.substring(1)
+            }
+            if (contentUri.lastIndexOf('/') == contentUri.length) {
+                contentUri = contentUri.substring(0, contentUri.length - 1)
+            }
+            moduleAlias.addPath(process.cwd() + '/' + contentUri + '/nodejs')
+            moduleAlias.addPath(process.cwd() + '/' + contentUri + '/nodejs/node_modules')
+        }
+    }
+    let variables = this.getEnvironmentVariablesforLambda(lambda)
+    if (variables) {
+        for (var v in variables) {
+            let variable = variables[v]
+            for (var w in variable) {
+                process.env[w] = variable[w]
+            }
+        }
+    }
+    /*
+    Most AWS functions can or may as well be called from the real aws-sdk - a call to DynamoDB or S3, for example,
+    but in the context of CrockStack there are some that won't work - such as invoking another lambda or leveraging
+    websockets. So the following replaces the AWS sdk with a mocked version, which delegates everything to the real
+    AWS SDK except that which we can execute within CrockStack.
+    */
+    moduleAlias.addPath(`${__dirname}/crock_node_modules`);
+    moduleAlias.addAlias("real-aws-sdk", "aws-sdk");
+    moduleAlias.addAlias("aws-sdk", "crock-aws-sdk");
+    //Our fake AWS SDK is going to need to call back into the stack, for instance to invoke one of its lambdas
+    //and the only way I can think to do that is to expose it globally.
+    global.stack=this;
+}
 function getHandlerforLambda(lambda) {
     let handler = lambda.Properties.Handler
     if (!handler && this.Globals && this.Globals.Function) {
@@ -115,7 +157,7 @@ function getHandlerforLambda(lambda) {
     if (handler && handler.indexOf('.') > -1) {
         handler = handler.substring(handler.indexOf('.') + 1)
     }
-    return handler
+    return handler;
 }
 function getLayersforLambda(lambda) {
     let layerArray = []
@@ -236,7 +278,7 @@ function resolveParameter(reference) {
     return reference
 }
 
-module.exports = {loadTemplate}
+module.exports = { loadTemplate }
 
 /*
 

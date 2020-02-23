@@ -59,11 +59,17 @@ async function testSynchronousContextEnvVars() {
     }
     return
 }
+async function testMockedAWS() {
+    const response = await fetch('http://localhost:8080/invoke')
+    const json = await response.json();
+    return
+}
 async function runTests() {
     await setUp()
     await testEnvVars()
     await testSynchronousEnvVars()
     await testSynchronousContextEnvVars()
+    await testMockedAWS()
     tearDown()
 }
 

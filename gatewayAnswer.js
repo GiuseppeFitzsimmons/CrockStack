@@ -72,30 +72,7 @@ var answerFunction = async function (request, response) {
     }
     let lambda = stack.getLambda(event);
     if (lambda) {
-        let layers = stack.getLayersforLambda(lambda)
-        if (layers) {
-            for (var l in layers) {
-                let layer = layers[l]
-                let contentUri = layer.Properties.ContentUri
-                if (contentUri.charAt(0) == '/') {
-                    contentUri = contentUri.substring(1)
-                }
-                if (contentUri.lastIndexOf('/') == contentUri.length) {
-                    contentUri = contentUri.substring(0, contentUri.length - 1)
-                }
-                moduleAlias.addPath(process.cwd() + '/' + contentUri + '/nodejs')
-                moduleAlias.addPath(process.cwd() + '/' + contentUri + '/nodejs/node_modules')
-            }
-        }
-        let variables = stack.getEnvironmentVariablesforLambda(lambda)
-        if (variables) {
-            for (var v in variables) {
-                let variable = variables[v]
-                for (var w in variable) {
-                    process.env[w] = variable[w]
-                }
-            }
-        }
+       stack.prepareLambdaForExecution(lambda);
         let codeUri = lambda.Properties.CodeUri
         if (codeUri.charAt(0) == '/') {
             codeUri = codeUri.substring(1)

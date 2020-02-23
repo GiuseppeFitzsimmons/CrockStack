@@ -118,6 +118,23 @@ Resources:
           Properties:
             Path: /hello-sync
             Method: any
+  
+  InvokeLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: invokelambda
+      Runtime: nodejs8.10
+      Role: 
+        !GetAtt LambdaExecutionRole.Arn
+      RestApiId: 
+        !Ref ApiGateway
+      Events:
+        ApiEventSource:
+          Type: Api
+          Properties:
+            Path: /invoke
+            Method: any
   SharedLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
