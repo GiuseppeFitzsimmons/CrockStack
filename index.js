@@ -86,7 +86,7 @@ function createTable(stack, resource) {
 }
 
 function makeUID(){
-    return Math.random()
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
 async function startWebSocket(apiGatewayV2, stack) {
