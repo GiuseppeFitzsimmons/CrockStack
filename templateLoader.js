@@ -276,7 +276,7 @@ function processToYaml(input) {
     return inputString
 }
 function resolveParameter(reference) {
-    console.log("resolveParamter", reference, this.parameterOverrides);
+    console.log("resolveParamter", reference);
     if (typeof (reference) == 'object') {
         if (reference._____Ref) {
             if (this.parameterOverrides[reference._____Ref]) {
@@ -284,6 +284,9 @@ function resolveParameter(reference) {
             }
             if (this.Parameters && this.Parameters[reference._____Ref]) {
                 return this.Parameters[reference._____Ref].Default
+            }
+            if (reference._____Ref.indexOf('.Arn')>-1){
+                return reference._____Ref.replace('.Arn', '')
             }
             return this.Resources[reference._____Ref]
         } else if (reference._____Join) {

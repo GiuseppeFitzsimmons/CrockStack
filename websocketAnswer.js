@@ -1,13 +1,38 @@
 /*
 
 */
+function findLambda(routeKey, stack) {
+    let routeResource = findResource(stack, 'AWS::ApiGatewayV2::Route', 'RouteKey', routeKey)
+    console.log('routeResource', routeResource);
+    let integrationResourceName = routeResource.Properties.Target.split('/')
+    integrationResourceName = integrationResourceName[integrationResourceName.length - 1];
+    let integrationResource = stack.Resources[integrationResourceName]
+    console.log('integrationResource', integrationResource.Properties.IntegrationUri);
+    let lambdaName = stack.resolveParameter(integrationResource.Properties.IntegrationUri)
+    console.log('lambdaName', lambdaName)
+    let lambdaNameSplit = lambdaName.split('/')
+    for (var i in lambdaNameSplit) {
+        if (lambdaNameSplit[i] == 'functions') {
+            lambdaName = lambdaNameSplit[i*1 + 1]
+            console.log('lambdaName', lambdaName, 'i', i, 'lambdaNameSplit.length', lambdaNameSplit.length)
+            break
+        }
+    }
+    console.log('stack.Resources[lambdaName]', stack.Resources[lambdaName], 'lambdaName', lambdaName)
+    return stack.Resources[lambdaName]
+}
 
-function websocketAnswer(ws, apiGatewayV2, stack){
+function websocketAnswer(ws, apiGatewayV2, stack, uniqueId) {
+    this.uniqueId = uniqueId
     //first thing we want to do is call the lambda associated with a connection.
     //The way that works in AWS APIGateWayV2, is there must be a resource of type AWS::ApiGatewayV2::Route,
     //which has a parameter called RouteKey which is equal to "$connect".
+    let lambda = findLambda('$connect', stack)
+    stack.prepareLambdaForExecution(lambda)
+    event = { requestContext: { connectionId: uniqueId } }
+    stack.executeLambda(lambda, event)
     ws.on('message', function incoming(message) {
-        console.log('received: %s', message);
+        /*console.log('received: %s', message);
         console.log('apiGatewayV2.Properties.RouteSelectionExpression', apiGatewayV2.Properties.RouteSelectionExpression);
         //The apiGateWayV2 will have a property called RouteSelectionExpression, the value of which is something like $request.body.action
         //We want to isolate whatever is after $request.body.
@@ -33,9 +58,9 @@ function websocketAnswer(ws, apiGatewayV2, stack){
         console.log('integrationResource', integrationResource);
         //Now we've got the integration resource, which has a property called IntegrationUri, in which we'll find the name
         //of the Lambda which is configured to answer this message.
-        ws.send('MESSAGE')
+        ws.send('MESSAGE')*/
     });
-    ws.on('close', function() {
+    ws.on('close', function () {
         //This is like connect, except it's disconnect. We want to do the same thing as with connect
         //except we're looking for a $routeKey the value of which is '$disconnnect'
     })
@@ -48,4 +73,4 @@ function findResource(stack, type, propertyName, propertyValue) {
         }
     }
 }
-module.exports = {websocketAnswer}
+module.exports = { websocketAnswer }
