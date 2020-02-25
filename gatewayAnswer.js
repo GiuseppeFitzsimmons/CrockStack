@@ -73,52 +73,7 @@ var answerFunction = async function (request, response) {
     let lambda = stack.getLambda(event);
     if (lambda) {
        stack.prepareLambdaForExecution(lambda);
-        let codeUri = lambda.Properties.CodeUri
-        if (codeUri.charAt(0) == '/') {
-            codeUri = codeUri.substring(1)
-        }
-        if (codeUri.lastIndexOf('/') == codeUri.length) {
-            codeUri = codeUri.substring(0, codeUri.length - 1)
-        }
-        let lambdaFunction = require(process.cwd() + '/' + codeUri)
-        let handler = stack.getHandlerforLambda(lambda)
-        var context = {}
-        let result;
-        if (lambdaFunction[handler].constructor.name === 'AsyncFunction') {
-            result = await lambdaFunction[handler](event, context)
-        } else {
-            let syncReply = await new Promise((resolve, reject) => {
-                context.done = (error, reply) => {
-                    resolve({ error, reply });
-                }
-                context.succeed = (reply) => {
-                    resolve({ reply });
-                }
-                context.fail = (error) => {
-                    if (!error) {
-                        error = {}
-                    }
-                    resolve({ error });
-                }
-                lambdaFunction[handler](event, context, function (err, reply) {
-                    context.done(err, reply);
-                })
-            })
-            if (syncReply.reply && (syncReply.reply.body || syncReply.reply.statusCode)) {
-                result = syncReply.reply;
-                if (!result.statusCode) {
-                    result.statusCode = 200;
-                }
-            } else if (syncReply.error) {
-                let _body = typeof (syncReply.error) == 'object' ? JSON.stringify(syncReply.error) : syncReply.error;
-                result = { body: _body };
-                result.statusCode = 400;
-            } else {
-                let _body = typeof (syncReply.reply) == 'object' ? JSON.stringify(syncReply.reply) : syncReply.reply;
-                result = { body: _body };
-                result.statusCode = 200;
-            }
-        }
+       let result=await stack.executeLambda(lambda, event);
         if (result.headers) {
             let headers = Object.keys(result.headers)
             for (var i in headers) {

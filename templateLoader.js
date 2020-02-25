@@ -72,6 +72,7 @@ function loadTemplate(templateName, parameterOverrides) {
     stack.getEnvironmentVariablesforLambda = getEnvironmentVariablesforLambda;
     stack.resolveParameter = resolveParameter;
     stack.prepareLambdaForExecution = prepareLambdaForExecution;
+    stack.executeLambda = executeLambda;
     stack.parameterOverrides = parameterOverrides;
     return stack
 }
@@ -149,6 +150,56 @@ function prepareLambdaForExecution(lambda) {
     //and the only way I can think to do that is to expose it globally.
     global.stack=this;
 }
+async function executeLambda(lambda, event) {
+
+    let codeUri = lambda.Properties.CodeUri
+    if (codeUri.charAt(0) == '/') {
+        codeUri = codeUri.substring(1)
+    }
+    if (codeUri.lastIndexOf('/') == codeUri.length) {
+        codeUri = codeUri.substring(0, codeUri.length - 1)
+    }
+    let lambdaFunction = require(process.cwd() + '/' + codeUri)
+    let handler = stack.getHandlerforLambda(lambda)
+    var context = {}
+    let result;
+    if (lambdaFunction[handler].constructor.name === 'AsyncFunction') {
+        result = await lambdaFunction[handler](event, context)
+    } else {
+        let syncReply = await new Promise((resolve, reject) => {
+            context.done = (error, reply) => {
+                resolve({ error, reply });
+            }
+            context.succeed = (reply) => {
+                resolve({ reply });
+            }
+            context.fail = (error) => {
+                if (!error) {
+                    error = {}
+                }
+                resolve({ error });
+            }
+            lambdaFunction[handler](event, context, function (err, reply) {
+                context.done(err, reply);
+            })
+        })
+        if (syncReply.reply && (syncReply.reply.body || syncReply.reply.statusCode)) {
+            result = syncReply.reply;
+            if (!result.statusCode) {
+                result.statusCode = 200;
+            }
+        } else if (syncReply.error) {
+            let _body = typeof (syncReply.error) == 'object' ? JSON.stringify(syncReply.error) : syncReply.error;
+            result = { body: _body };
+            result.statusCode = 400;
+        } else {
+            let _body = typeof (syncReply.reply) == 'object' ? JSON.stringify(syncReply.reply) : syncReply.reply;
+            result = { body: _body };
+            result.statusCode = 200;
+        }
+    }
+    return result;
+} 
 function getHandlerforLambda(lambda) {
     let handler = lambda.Properties.Handler
     if (!handler && this.Globals && this.Globals.Function) {
