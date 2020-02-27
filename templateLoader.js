@@ -146,8 +146,8 @@ function prepareLambdaForExecution(lambda) {
     moduleAlias.addPath(`${__dirname}/crock_node_modules`);
     moduleAlias.addAlias("real-aws-sdk", "aws-sdk");
     moduleAlias.addAlias("aws-sdk", "crock-aws-sdk");
-    //Our fake AWS SDK is going to need to call back into the stack, for instance to invoke one of its lambdas
-    //and the only way I can think to do that is to expose it globally.
+    //Our fake AWS SDK is going to need to call back into the stack, for instance to send a message
+    //to a websocket and the only way I can think to do that is to expose it globally.
     global.stack=this;
 }
 async function executeLambda(lambda, event) {
