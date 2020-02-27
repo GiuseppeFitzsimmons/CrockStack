@@ -3,22 +3,17 @@
 */
 function findLambda(routeKey, stack) {
     let routeResource = findResource(stack, 'AWS::ApiGatewayV2::Route', 'RouteKey', routeKey)
-    console.log('routeResource', routeResource);
     let integrationResourceName = routeResource.Properties.Target.split('/')
     integrationResourceName = integrationResourceName[integrationResourceName.length - 1];
     let integrationResource = stack.Resources[integrationResourceName]
-    console.log('integrationResource', integrationResource.Properties.IntegrationUri);
     let lambdaName = stack.resolveParameter(integrationResource.Properties.IntegrationUri)
-    console.log('lambdaName', lambdaName)
     let lambdaNameSplit = lambdaName.split('/')
     for (var i in lambdaNameSplit) {
         if (lambdaNameSplit[i] == 'functions') {
-            lambdaName = lambdaNameSplit[i*1 + 1]
-            console.log('lambdaName', lambdaName, 'i', i, 'lambdaNameSplit.length', lambdaNameSplit.length)
+            lambdaName = lambdaNameSplit[i * 1 + 1]
             break
         }
     }
-    console.log('stack.Resources[lambdaName]', stack.Resources[lambdaName], 'lambdaName', lambdaName)
     return stack.Resources[lambdaName]
 }
 
@@ -31,9 +26,8 @@ function websocketAnswer(ws, apiGatewayV2, stack, uniqueId) {
     stack.prepareLambdaForExecution(lambda)
     event = { requestContext: { connectionId: uniqueId } }
     stack.executeLambda(lambda, event)
+    ws.uniqueId = uniqueId
     ws.on('message', function incoming(message) {
-        /*console.log('received: %s', message);
-        console.log('apiGatewayV2.Properties.RouteSelectionExpression', apiGatewayV2.Properties.RouteSelectionExpression);
         //The apiGateWayV2 will have a property called RouteSelectionExpression, the value of which is something like $request.body.action
         //We want to isolate whatever is after $request.body.
         let key = apiGatewayV2.Properties.RouteSelectionExpression.replace('$request.body.', '');
@@ -43,28 +37,27 @@ function websocketAnswer(ws, apiGatewayV2, stack, uniqueId) {
         //then the action would be "update". 
         let request = JSON.parse(message);
         let route = request.body[key];
-        //Sticking with the example, the value of route should be 'update'.
-        console.log('route', route)
-        //So to direct this message to the right lambda, first we find a Route the RouteKey of which is equal to 'update'.
-        let routeResource = findResource(stack, 'AWS::ApiGatewayV2::Route', 'RouteKey', route)
-        console.log('routeResource', routeResource);
-        //Once we have the Route, then we have to get its Target, and parse it to find the name of the integration resource
-        //Let's assume that the Target is '/integrations/ConnectIntegration'.
-        let integrationResourceName = routeResource.Properties.Target.split('/')
-        integrationResourceName = integrationResourceName[integrationResourceName.length - 1];
-        //With the above example, we should have identified the name of the resource of type AWS::ApiGatewayV2::Integration
-        //So we can get it by just asking the stack for it by name
-        let integrationResource = stack.Resources[integrationResourceName]
-        console.log('integrationResource', integrationResource);
-        //Now we've got the integration resource, which has a property called IntegrationUri, in which we'll find the name
-        //of the Lambda which is configured to answer this message.
-        ws.send('MESSAGE')*/
+        let lambda = findLambda(route, stack)
+        stack.prepareLambdaForExecution(lambda)
+        event = { requestContext: { connectionId: this.uniqueId, body: request.body } }
+        stack.executeLambda(lambda, event)
     });
     ws.on('close', function () {
         //This is like connect, except it's disconnect. We want to do the same thing as with connect
         //except we're looking for a $routeKey the value of which is '$disconnnect'
+        let lambda = findLambda('$disconnect', stack)
+        stack.prepareLambdaForExecution(lambda)
+        event = { requestContext: { connectionId: uniqueId } }
+        stack.executeLambda(lambda, event)
     })
+    this.sendMessage = function (data) {
+        ws.send(JSON.stringify(data))
+    }
+    return this
 }
+
+
+
 function findResource(stack, type, propertyName, propertyValue) {
     for (var i in stack.Resources) {
         let resource = stack.Resources[i]

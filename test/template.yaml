@@ -208,3 +208,55 @@ Resources:
       Runtime: nodejs8.10
       Role: 
         !GetAtt LambdaExecutionRole.Arn
+
+  MessageConnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref SimpleChatWebSocket
+      RouteKey: message
+      AuthorizationType: NONE
+      OperationName: MessageConnectRoute
+      Target: '/integrations/MessageConnectIntegration'
+  MessageConnectIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref SimpleChatWebSocket
+      Description: Connect Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri: 
+        Fn::Sub:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MessageFunction.Arn}/invocations
+  MessageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: messageLambda
+      Runtime: nodejs8.10
+      Role: 
+        !GetAtt LambdaExecutionRole.Arn
+
+  DisconnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref SimpleChatWebSocket
+      RouteKey: $disconnect
+      AuthorizationType: NONE
+      OperationName: MessageConnectRoute
+      Target: '/integrations/DisconnectIntegration'
+  DisconnectIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref SimpleChatWebSocket
+      Description: Connect Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri: 
+        Fn::Sub:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DisconnectFunction.Arn}/invocations
+  DisconnectFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: disconnectLambda
+      Runtime: nodejs8.10
+      Role: 
+        !GetAtt LambdaExecutionRole.Arn

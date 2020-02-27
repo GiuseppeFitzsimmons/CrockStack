@@ -93,10 +93,10 @@ async function startWebSocket(apiGatewayV2, stack) {
     console.log('Starting WebSocket')
 
     const wss = new WebSocket.Server({ port: 9090 });
-    const connections = {}
+    stack.connections = {}
     wss.on('connection', function connection(ws) {
         let uniqueId = makeUID()
-        connections[uniqueId]=websocketAnswer(ws, apiGatewayV2, stack, uniqueId)
+        stack.connections[uniqueId]=websocketAnswer(ws, apiGatewayV2, stack, uniqueId)
     });
 }
 module.exports = { startServer }
