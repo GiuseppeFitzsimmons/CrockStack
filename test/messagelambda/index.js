@@ -12,13 +12,23 @@ exports.handler = async (event, context) => {
     returnObject.statusCode = 200;
     console.log("messagelambda event", event);
     try {
-        await apigwManagementApi.postToConnection({ ConnectionId: event.requestContext.connectionId, Data: { message: 'hello from messagelambda' } }).promise();
-        apigwManagementApi.getConnection({ ConnectionId: event.requestContext.connectionId}, function(error, connectionDetail) {
-            console.log("Connection detail", connectionDetail);
-        });
+        await new Promise( (resolve, reject)=>{
+            //Little wait, so that we can test, for instance, stale connections
+            setTimeout(resolve, 5000)
+        })
+        let data=await new Promise( (resolve, reject) => {
+            apigwManagementApi.getConnection({ ConnectionId: event.requestContext.connectionId}, function(error, connectionDetail) {
+                console.log("Connection detail", connectionDetail);
+                let d={ message: `hello from messagelambda - your ip address is ${connectionDetail.Identity.SourceIp}, the current time is ${new Date().toISOString()}` };
+                resolve(d);
+            });
+        })
+        await apigwManagementApi.postToConnection({ ConnectionId: event.requestContext.connectionId, Data: data }).promise();
+        
+        
     } catch (e) {
         if (e.statusCode === 410) {
-            console.log(`Found stale connection, deleting ${connectionId}`);
+            console.log(`Found stale connection ${event.requestContext.connectionId}`);
         } else {
             throw e;
         }

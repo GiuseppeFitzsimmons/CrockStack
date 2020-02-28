@@ -55,9 +55,13 @@ function websocketAnswer(ws, apiGatewayV2, stack, uniqueId) {
     })
     this.sendMessage = function (data, callback) {
         this.lastActiveAt=new Date().toISOString();
-        ws.send(JSON.stringify(data), (error, data)=>{
-            callback(error, data);
-        })
+        if (ws.readyState===3 /*connection is closed*/) {
+            callback({statusCode: 410});
+        } else {
+            ws.send(JSON.stringify(data), (error, data)=>{
+                callback(error, data);
+            })
+        }
     }
     this.getConnectionDetail = function(){
         return {

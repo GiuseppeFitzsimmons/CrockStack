@@ -3,13 +3,13 @@ var http = require('http');
 const parameterOverrides = { 'AWS::StackName': 'CrockStack', 'AWS::Region': 'local' };
 const { getAnswerFunction } = require('./gatewayAnswer');
 const { loadTemplate } = require('./templateLoader');
-//const { resolveParameter } = require('./resolveFunction');
 const { websocketAnswer } = require('./websocketAnswer');
 const WebSocket = require('ws');
 
 function startServer() {
     var templateName = 'template.yaml'
     var _port = 8080
+    var _wsport = 9090
     for (var i in process.argv) {
         if (process.argv[i] == '--port') {
             _port = process.argv[i * 1 + 1]
@@ -30,6 +30,8 @@ function startServer() {
             if (parameterOverrides.DymamoDbEndpoint) {
                 parameterOverrides.DynamoDbEndpoint = parameterOverrides.DymamoDbEndpoint
             }
+        } else if (process.argv[i] == '--wsport') {
+            _wsport = process.argv[i * 1 + 1]
         }
     }
     var stack = loadTemplate(templateName, parameterOverrides)
@@ -54,14 +56,17 @@ function startServer() {
     if (stack.Resources) {
         for (var i in stack.Resources) {
             if (stack.Resources[i].Type == 'AWS::ApiGatewayV2::Api') {
-                startWebSocket(stack.Resources[i], stack)
+                startWebSocket(stack.Resources[i], stack, _wsport);
+                //TODO support multipled instances of AWS::ApiGatewayV2::Api
+                _wsport=(_wsport*1+1);
             }
         }
     }
-    let af = getAnswerFunction(stack)
-    var server = http.createServer(af)
-    server.listen(_port)
-    console.log('Server now listening on port ', _port)
+    let answerFunction = getAnswerFunction(stack);
+    var server = http.createServer(answerFunction);
+    //TODO support multipled instances of AWS::ApiGateway::Api
+    server.listen(_port);
+    console.log(`Server listening on port ${_port}`);
 
 }
 function createTable(stack, resource) {
@@ -89,15 +94,17 @@ function makeUID(){
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
-async function startWebSocket(apiGatewayV2, stack) {
+async function startWebSocket(apiGatewayV2, stack, wsport) {
     console.log('Starting WebSocket')
 
-    const wss = new WebSocket.Server({ port: 9090 });
+    const wss = new WebSocket.Server({ port: wsport ? wsport : 9090 });
     stack.connections = {}
     wss.on('connection', function connection(ws, request) {
+        console.log("headers", request.headers);
         let uniqueId = makeUID();
         ws.ipAddress=request.connection.remoteAddress;
         stack.connections[uniqueId]=websocketAnswer(ws, apiGatewayV2, stack, uniqueId)
     });
+    console.log(`Websocket server listening on ${wsport}`);
 }
 module.exports = { startServer }
