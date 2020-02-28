@@ -12,7 +12,10 @@ exports.handler = async (event, context) => {
     returnObject.statusCode = 200;
     console.log("messagelambda event", event);
     try {
-        await apigwManagementApi.postToConnection({ ConnectionId: event.requestContext.connectionId, Data: { message: 'hello from messagelambda' } })//.promise();
+        await apigwManagementApi.postToConnection({ ConnectionId: event.requestContext.connectionId, Data: { message: 'hello from messagelambda' } }).promise();
+        apigwManagementApi.getConnection({ ConnectionId: event.requestContext.connectionId}, function(error, connectionDetail) {
+            console.log("Connection detail", connectionDetail);
+        });
     } catch (e) {
         if (e.statusCode === 410) {
             console.log(`Found stale connection, deleting ${connectionId}`);

@@ -18,7 +18,9 @@ function findLambda(routeKey, stack) {
 }
 
 function websocketAnswer(ws, apiGatewayV2, stack, uniqueId) {
-    this.uniqueId = uniqueId
+    this.uniqueId = uniqueId;
+    this.lastActiveAt=new Date().toISOString();
+    this.connectedAt=new Date().toISOString();
     //first thing we want to do is call the lambda associated with a connection.
     //The way that works in AWS APIGateWayV2, is there must be a resource of type AWS::ApiGatewayV2::Route,
     //which has a parameter called RouteKey which is equal to "$connect".
@@ -26,20 +28,21 @@ function websocketAnswer(ws, apiGatewayV2, stack, uniqueId) {
     stack.prepareLambdaForExecution(lambda)
     event = { requestContext: { connectionId: uniqueId } }
     stack.executeLambda(lambda, event)
-    ws.uniqueId = uniqueId
+    ws.websocketAnswer = this;
     ws.on('message', function incoming(message) {
+        this.websocketAnswer.lastActiveAt=new Date().toISOString();
         //The apiGateWayV2 will have a property called RouteSelectionExpression, the value of which is something like $request.body.action
         //We want to isolate whatever is after $request.body.
         let key = apiGatewayV2.Properties.RouteSelectionExpression.replace('$request.body.', '');
         //Now we've got our routeKey. If, for example, the RouteSelectionExpression was $request.body.message, then the key is "action"
         //So that would mean we'd want to find the value of "action" in the incoming message from the user.
-        //If, for example, the message from the client was {body: {action:'update'}},
+        //If, for example, the message from the client was {action:'update'},
         //then the action would be "update". 
         let request = JSON.parse(message);
-        let route = request.body[key];
+        let route = request[key];
         let lambda = findLambda(route, stack)
         stack.prepareLambdaForExecution(lambda)
-        event = { requestContext: { connectionId: this.uniqueId, body: request.body } }
+        event = { requestContext: { connectionId: this.websocketAnswer.uniqueId, body: request } }
         stack.executeLambda(lambda, event)
     });
     ws.on('close', function () {
@@ -50,8 +53,20 @@ function websocketAnswer(ws, apiGatewayV2, stack, uniqueId) {
         event = { requestContext: { connectionId: uniqueId } }
         stack.executeLambda(lambda, event)
     })
-    this.sendMessage = function (data) {
-        ws.send(JSON.stringify(data))
+    this.sendMessage = function (data, callback) {
+        this.lastActiveAt=new Date().toISOString();
+        ws.send(JSON.stringify(data), (error, data)=>{
+            callback(error, data);
+        })
+    }
+    this.getConnectionDetail = function(){
+        return {
+            LastActiveAt: this.lastActiveAt,
+            ConnectedAt: this.connectedAt,
+            Identity: {
+                SourceIp: ws.ipAddress
+            }
+        }
     }
     return this
 }

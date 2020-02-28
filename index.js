@@ -94,8 +94,9 @@ async function startWebSocket(apiGatewayV2, stack) {
 
     const wss = new WebSocket.Server({ port: 9090 });
     stack.connections = {}
-    wss.on('connection', function connection(ws) {
-        let uniqueId = makeUID()
+    wss.on('connection', function connection(ws, request) {
+        let uniqueId = makeUID();
+        ws.ipAddress=request.connection.remoteAddress;
         stack.connections[uniqueId]=websocketAnswer(ws, apiGatewayV2, stack, uniqueId)
     });
 }
