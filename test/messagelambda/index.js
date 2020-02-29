@@ -29,6 +29,7 @@ exports.handler = async (event, context) => {
     } catch (e) {
         if (e.statusCode === 410) {
             console.log(`Found stale connection ${event.requestContext.connectionId}`);
+            await apigwManagementApi.deleteConnection({ ConnectionId: event.requestContext.connectionId}).promise();
         } else {
             throw e;
         }

@@ -72,6 +72,9 @@ function websocketAnswer(ws, apiGatewayV2, stack, uniqueId) {
             }
         }
     }
+    this.disconnect=function(callback) {
+        ws.close(callback);
+    }
     return this
 }
 
