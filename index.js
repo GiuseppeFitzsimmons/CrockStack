@@ -73,7 +73,7 @@ function createTable(stack, resource) {
     delete resource.Properties.BillingMode;
     delete resource.Properties.PointInTimeRecoverySpecification;
     const { execSync } = require('child_process')
-    resource.Properties.TableName = resolveParameter(stack, resource.Properties.TableName, parameterOverrides)
+    resource.Properties.TableName = stack.resolveParameter(resource.Properties.TableName)
     fs.writeFileSync(resource.Properties.TableName + '.JSON', JSON.stringify(resource.Properties))
     try {
         console.log(`Deleting ${resource.Properties.TableName}, 10 second timeout`)
