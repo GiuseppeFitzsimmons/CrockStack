@@ -2,8 +2,14 @@
 
 */
 function findLambda(routeKey, stack) {
-    let routeResource = findResource(stack, 'AWS::ApiGatewayV2::Route', 'RouteKey', routeKey)
-    let integrationResourceName = routeResource.Properties.Target.split('/')
+    let routeResource = findResource(stack, 'AWS::ApiGatewayV2::Route', 'RouteKey', routeKey);
+    console.log("findLambda", routeResource, routeKey);
+    let _target = routeResource.Properties.Target;
+    if (typeof _target != 'string') {
+        _target = stack.resolveParameter(_target);
+    }
+    console.log("target", _target);
+    let integrationResourceName = _target.split('/');
     integrationResourceName = integrationResourceName[integrationResourceName.length - 1];
     let integrationResource = stack.Resources[integrationResourceName]
     let lambdaName = stack.resolveParameter(integrationResource.Properties.IntegrationUri)
@@ -19,8 +25,8 @@ function findLambda(routeKey, stack) {
 
 function websocketAnswer(ws, apiGatewayV2, stack, uniqueId) {
     this.uniqueId = uniqueId;
-    this.lastActiveAt=new Date().toISOString();
-    this.connectedAt=new Date().toISOString();
+    this.lastActiveAt = new Date().toISOString();
+    this.connectedAt = new Date().toISOString();
     //first thing we want to do is call the lambda associated with a connection.
     //The way that works in AWS APIGateWayV2, is there must be a resource of type AWS::ApiGatewayV2::Route,
     //which has a parameter called RouteKey which is equal to "$connect".
@@ -30,7 +36,7 @@ function websocketAnswer(ws, apiGatewayV2, stack, uniqueId) {
     stack.executeLambda(lambda, event)
     ws.websocketAnswer = this;
     ws.on('message', function incoming(message) {
-        this.websocketAnswer.lastActiveAt=new Date().toISOString();
+        this.websocketAnswer.lastActiveAt = new Date().toISOString();
         //The apiGateWayV2 will have a property called RouteSelectionExpression, the value of which is something like $request.body.action
         //We want to isolate whatever is after $request.body.
         let key = apiGatewayV2.Properties.RouteSelectionExpression.replace('$request.body.', '');
@@ -54,16 +60,16 @@ function websocketAnswer(ws, apiGatewayV2, stack, uniqueId) {
         stack.executeLambda(lambda, event)
     })
     this.sendMessage = function (data, callback) {
-        this.lastActiveAt=new Date().toISOString();
-        if (ws.readyState===3 /*connection is closed*/) {
-            callback({statusCode: 410});
+        this.lastActiveAt = new Date().toISOString();
+        if (ws.readyState === 3 /*connection is closed*/) {
+            callback({ statusCode: 410 });
         } else {
-            ws.send(JSON.stringify(data), (error, data)=>{
+            ws.send(JSON.stringify(data), (error, data) => {
                 callback(error, data);
             })
         }
     }
-    this.getConnectionDetail = function(){
+    this.getConnectionDetail = function () {
         return {
             LastActiveAt: this.lastActiveAt,
             ConnectedAt: this.connectedAt,
@@ -72,7 +78,7 @@ function websocketAnswer(ws, apiGatewayV2, stack, uniqueId) {
             }
         }
     }
-    this.disconnect=function(callback) {
+    this.disconnect = function (callback) {
         ws.close(callback);
     }
     return this
