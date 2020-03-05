@@ -103,7 +103,7 @@ async function startWebSocket(apiGatewayV2, stack, wsport) {
         console.log("headers", request.headers);
         let uniqueId = makeUID();
         ws.ipAddress=request.connection.remoteAddress;
-        stack.connections[uniqueId]=websocketAnswer(ws, apiGatewayV2, stack, uniqueId)
+        stack.connections[uniqueId]=new websocketAnswer(ws, apiGatewayV2, stack, uniqueId)
     });
     console.log(`Websocket server listening on ${wsport}`);
 }
