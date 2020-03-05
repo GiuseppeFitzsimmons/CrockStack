@@ -113,7 +113,6 @@ function getLambda(event) {
 function prepareLambdaForExecution(lambda) {
 
     let layers = this.getLayersforLambda(lambda);
-    console.log("layers", layers);
     if (layers) {
         for (var l in layers) {
             let layer = layers[l]
@@ -276,7 +275,6 @@ function processToYaml(input) {
     return inputString
 }
 function resolveParameter(reference) {
-    console.log("resolveParamter", reference);
     if (typeof (reference) == 'object') {
         if (reference._____Ref) {
             if (this.parameterOverrides[reference._____Ref]) {
