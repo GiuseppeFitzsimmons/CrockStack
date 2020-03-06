@@ -18,6 +18,9 @@ function findLambda(routeKey, stack) {
             break
         }
     }
+    if (!lambdaName && routeKey!='$default') {
+        lambdaName=findLambda('$default', stack);
+    }
     return stack.Resources[lambdaName]
 }
 
@@ -28,10 +31,12 @@ function websocketAnswer(ws, apiGatewayV2, stack, uniqueId) {
     //first thing we want to do is call the lambda associated with a connection.
     //The way that works in AWS APIGateWayV2, is there must be a resource of type AWS::ApiGatewayV2::Route,
     //which has a parameter called RouteKey which is equal to "$connect".
-    let lambda = findLambda('$connect', stack)
-    stack.prepareLambdaForExecution(lambda)
-    event = { requestContext: { connectionId: uniqueId } }
-    stack.executeLambda(lambda, event)
+    let lambda = findLambda('$connect', stack);
+    if (lambda) {
+        stack.prepareLambdaForExecution(lambda)
+        event = { requestContext: { connectionId: uniqueId } }
+        stack.executeLambda(lambda, event)
+    }
     ws.websocketAnswer = this;
     ws.on('message', function incoming(message) {
         this.websocketAnswer.lastActiveAt = new Date().toISOString();
@@ -45,9 +50,6 @@ function websocketAnswer(ws, apiGatewayV2, stack, uniqueId) {
         let request = JSON.parse(message);
         let route = request[key];
         let lambda = findLambda(route, stack);
-        if (!lambda) {
-            lambda=findLambda('$default', stack);
-        }
         if (lambda) {
             stack.prepareLambdaForExecution(lambda);
             let requestContext={
@@ -61,10 +63,12 @@ function websocketAnswer(ws, apiGatewayV2, stack, uniqueId) {
     ws.on('close', function () {
         //This is like connect, except it's disconnect. We want to do the same thing as with connect
         //except we're looking for a $routeKey the value of which is '$disconnnect'
-        let lambda = findLambda('$disconnect', stack)
-        stack.prepareLambdaForExecution(lambda)
-        event = { requestContext: { connectionId: uniqueId } }
-        stack.executeLambda(lambda, event)
+        let lambda = findLambda('$disconnect', stack);
+        if (lambda) {
+            stack.prepareLambdaForExecution(lambda);
+            event = { requestContext: { connectionId: uniqueId, routeKey: '$disconnect' } }
+            stack.executeLambda(lambda, event)
+        }
     })
     this.sendMessage = function (data, callback) {
         this.lastActiveAt = new Date().toISOString();
