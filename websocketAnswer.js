@@ -49,8 +49,12 @@ function websocketAnswer(ws, apiGatewayV2, stack, uniqueId) {
             lambda=findLambda('$default', stack);
         }
         if (lambda) {
-            stack.prepareLambdaForExecution(lambda)
-            event = { requestContext: { connectionId: this.websocketAnswer.uniqueId }, body: request }
+            stack.prepareLambdaForExecution(lambda);
+            let requestContext={
+                connectionId: this.websocketAnswer.uniqueId,
+                routeKey: route
+            }
+            event = { requestContext, body: message }
             stack.executeLambda(lambda, event)
         }
     });
