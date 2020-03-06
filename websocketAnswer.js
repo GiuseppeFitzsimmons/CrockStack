@@ -3,12 +3,20 @@
 */
 function findLambda(routeKey, stack) {
     let routeResource = findResource(stack, 'AWS::ApiGatewayV2::Route', 'RouteKey', routeKey);
+    if (!routeResource && routeKey!='$default') {
+        routeResource=findResource(stack, 'AWS::ApiGatewayV2::Route', 'RouteKey', '$default');
+    }
+    if (!routeResource) {
+        console.log("Unable to find route for ", routeKey);
+        return;
+    }
     let _target = routeResource.Properties.Target;
     if (typeof _target != 'string') {
         _target = stack.resolveParameter(_target);
     }
     let integrationResourceName = _target.split('/');
     integrationResourceName = integrationResourceName[integrationResourceName.length - 1];
+    console.log("integrationResourceName", integrationResourceName);
     let integrationResource = stack.Resources[integrationResourceName]
     let lambdaName = stack.resolveParameter(integrationResource.Properties.IntegrationUri)
     let lambdaNameSplit = lambdaName.split('/')
@@ -17,9 +25,6 @@ function findLambda(routeKey, stack) {
             lambdaName = lambdaNameSplit[i * 1 + 1]
             break
         }
-    }
-    if (!lambdaName && routeKey!='$default') {
-        lambdaName=findLambda('$default', stack);
     }
     return stack.Resources[lambdaName]
 }
@@ -75,7 +80,10 @@ function websocketAnswer(ws, apiGatewayV2, stack, uniqueId) {
         if (ws.readyState === 3 /*connection is closed*/) {
             callback({ statusCode: 410 });
         } else {
-            ws.send(JSON.stringify(data), (error, data) => {
+            if (typeof data=='object') {
+                data=JSON.stringify(data);
+            }
+            ws.send(data, (error, data) => {
                 callback(error, data);
             })
         }

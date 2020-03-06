@@ -113,9 +113,13 @@ function getLambda(event) {
 function prepareLambdaForExecution(lambda) {
 
     let layers = this.getLayersforLambda(lambda);
+    console.log("layers", layers);
     if (layers) {
         for (var l in layers) {
-            let layer = layers[l]
+            let layer = layers[l];
+            if (typeof layer==='string') {
+                layer=this.Resources[layer];
+            }
             let contentUri = layer.Properties.ContentUri
             if (contentUri.charAt(0) == '/') {
                 contentUri = contentUri.substring(1)
@@ -275,6 +279,7 @@ function processToYaml(input) {
     return inputString
 }
 function resolveParameter(reference) {
+    console.log("resolveParamter", reference);
     if (typeof (reference) == 'object') {
         if (reference._____Ref) {
             if (this.parameterOverrides[reference._____Ref]) {
@@ -286,7 +291,12 @@ function resolveParameter(reference) {
             if (reference._____Ref.indexOf('.Arn')>-1){
                 return reference._____Ref.replace('.Arn', '')
             }
-            return this.Resources[reference._____Ref]
+            let _reference=this.Resources[reference._____Ref];
+            if (typeof _reference==='object') {
+                //Really, this should be an Arn or an ID or whatever's appropriate to Ref Resource type
+                return reference._____Ref
+            }
+            return this.Resources[reference._____Ref];;
         } else if (reference._____Join) {
             if (typeof (reference._____Join) == 'object') {
                 let newArray = []
