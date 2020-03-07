@@ -48,7 +48,7 @@ function websocketAnswer(ws, apiGatewayV2, stack, uniqueId) {
         //The apiGateWayV2 will have a property called RouteSelectionExpression, the value of which is something like $request.body.action
         //We want to isolate whatever is after $request.body.
         let key = apiGatewayV2.Properties.RouteSelectionExpression.replace('$request.body.', '');
-        //Now we've got our routeKey. If, for example, the RouteSelectionExpression was $request.body.message, then the key is "action"
+        //Now we've got our routeKey. If, for example, the RouteSelectionExpression was $request.body.action, then the key is "action"
         //So that would mean we'd want to find the value of "action" in the incoming message from the user.
         //If, for example, the message from the client was {action:'update'},
         //then the action would be "update". 
