@@ -1,5 +1,5 @@
 /*
-
+Find the lambda by the routeKey, of railing that by $default
 */
 function findLambda(routeKey, stack) {
     let routeResource = findResource(stack, 'AWS::ApiGatewayV2::Route', 'RouteKey', routeKey);
