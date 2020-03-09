@@ -16,7 +16,6 @@ function findLambda(routeKey, stack) {
     }
     let integrationResourceName = _target.split('/');
     integrationResourceName = integrationResourceName[integrationResourceName.length - 1];
-    console.log("integrationResourceName", integrationResourceName);
     let integrationResource = stack.Resources[integrationResourceName]
     let lambdaName = stack.resolveParameter(integrationResource.Properties.IntegrationUri)
     let lambdaNameSplit = lambdaName.split('/')
