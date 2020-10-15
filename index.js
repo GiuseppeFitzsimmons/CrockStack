@@ -8,8 +8,9 @@ const WebSocket = require('ws');
 
 function startServer() {
     var templateName = 'template.yaml'
-    var _port = 8080
-    var _wsport = 9090
+    var _port = 8080;
+    var _wsport = 9090;
+    var _skipDb=false;
     for (var i in process.argv) {
         if (process.argv[i] == '--port') {
             _port = process.argv[i * 1 + 1]
@@ -32,17 +33,19 @@ function startServer() {
             }
         } else if (process.argv[i] == '--wsport') {
             _wsport = process.argv[i * 1 + 1]
+        } else if (process.argv[i] == '--skipdb') {
+            _skipDb = process.argv[i * 1 + 1].toLowerCase().indexOf('t')>-1;
         }
     }
     var stack = loadTemplate(templateName, parameterOverrides)
     for (i in stack.Resources) {
         let resource = stack.Resources[i]
         if (resource.Type == 'AWS::DynamoDB::Table') {
-            if (parameterOverrides.DynamoDbEndpoint) {
+            if (parameterOverrides.DynamoDbEndpoint && !_skipDb) {
                 createTable(stack, resource)
             }
         } else if (resource.Type == 'AWS::Serverless::SimpleTable') {
-            if (parameterOverrides.DynamoDbEndpoint) {
+            if (parameterOverrides.DynamoDbEndpoint && !_skipDb) {
                 let primaryKey = resource.Properties.PrimaryKey
                 resource.Properties.KeySchema = []
                 resource.Properties.KeySchema.push({ AttributeName: primaryKey.Name, KeyType: 'HASH' })

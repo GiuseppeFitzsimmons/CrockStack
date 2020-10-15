@@ -161,12 +161,21 @@ async function executeLambda(lambda, event) {
     if (codeUri.lastIndexOf('/') == codeUri.length) {
         codeUri = codeUri.substring(0, codeUri.length - 1)
     }
-    let lambdaFunction = require(process.cwd() + '/' + codeUri)
+    let result;
+    let lambdaFunction;
+    try {
+        lambdaFunction = require(process.cwd() + '/' + codeUri);
+    } catch (err) {
+        return {statusCode:500};
+    }
     let handler = stack.getHandlerforLambda(lambda)
     var context = {}
-    let result;
     if (lambdaFunction[handler].constructor.name === 'AsyncFunction') {
-        result = await lambdaFunction[handler](event, context)
+        try {
+            result = await lambdaFunction[handler](event, context)
+        } catch(err) {
+            return {statusCode:500};
+        }
     } else {
         let syncReply = await new Promise((resolve, reject) => {
             context.done = (error, reply) => {
@@ -181,9 +190,13 @@ async function executeLambda(lambda, event) {
                 }
                 resolve({ error });
             }
-            lambdaFunction[handler](event, context, function (err, reply) {
-                context.done(err, reply);
-            })
+            try {
+                lambdaFunction[handler](event, context, function (err, reply) {
+                    context.done(err, reply);
+                })
+            } catch (err) {
+                context.fail({statusCode:500});
+            }
         })
         if (syncReply.reply && (syncReply.reply.body || syncReply.reply.statusCode)) {
             result = syncReply.reply;
