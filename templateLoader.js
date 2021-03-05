@@ -17,10 +17,13 @@ function loadTemplate(templateName, parameterOverrides) {
         stack = yaml.load(input)
     }
     for (i in stack.Resources) {
+        //Review - After getting to the end of this loop, I do not understand why we do it.
         var resource = stack.Resources[i]
         if (resource.Type == 'AWS::Serverless::Api') {
+            //To self - We're going through the gateway resource type to find where openapi.yaml is (if Paths isn't already present)
             if (resource.Properties.DefinitionBody) {
                 var paths = resource.Properties.DefinitionBody.Paths
+                //Review - Why does _____Transform work? I thought the RegExp would replace Fn::Transform with _____Fn::Transform
                 if (!paths && resource.Properties.DefinitionBody._____Transform &&
                     resource.Properties.DefinitionBody._____Transform.Parameters &&
                     resource.Properties.DefinitionBody._____Transform.Parameters.Location) {
@@ -45,13 +48,17 @@ function loadTemplate(templateName, parameterOverrides) {
                                         lambdaName = JSON.stringify(lambdaName)
                                         lambdaName = lambdaName.substring(lambdaName.indexOf('functions/${') + 12)
                                         lambdaName = lambdaName.substring(0, lambdaName.indexOf('.Arn'))
+                                        //At this point we end up with WwddLambda
                                         if (stack.Resources[lambdaName]) {
                                             var lambda = stack.Resources[lambdaName]
                                             if (!lambda.Properties.Events) {
                                                 lambda.Properties.Events = {}
                                             }
                                             var event = {}
+                                            //Review - I don't know if this RegExp does anything
                                             lambda.Properties.Events[path.replace(new RegExp('\/', 'g'), '_') + method] = event
+                                            //Empty out the events of the lambda, populate with the path & methods found in openapi.yaml.
+                                            //In this case, the lambda already had the right values.
                                             event.Type = 'Api'
                                             event.Properties = {}
                                             event.Properties.Path = path
@@ -84,6 +91,7 @@ function getLambda(event) {
             for (var j in resource.Properties.Events) {
                 let resourceEvent = resource.Properties.Events[j]
                 if (resourceEvent.Type == 'Api'
+                //To self - We're checking the method because you could have multiple lambdas responding to the same path, but not the same method
                     && (resourceEvent.Properties.Method == event.httpMethod
                         || resourceEvent.Properties.Method == 'any')
                 ) {
@@ -116,6 +124,7 @@ function prepareLambdaForExecution(lambda) {
     if (layers) {
         for (var l in layers) {
             let layer = layers[l];
+            //Review - What is the format of what's returned by getLayersforLambda? I didn't think layers[l] would be a string.
             if (typeof layer==='string') {
                 layer=this.Resources[layer];
             }
@@ -127,6 +136,8 @@ function prepareLambdaForExecution(lambda) {
                 contentUri = contentUri.substring(0, contentUri.length - 1)
             }
             moduleAlias.addPath(process.cwd() + '/' + contentUri + '/nodejs')
+            //So in this case, you've got sharedlayer defined as the only layer in Globals
+            //It's got the contenturi sharedlayer/, it gets truncated then moduleAlias.addPath points towards the sharedlayer/nodejs you can see in the workspace
             moduleAlias.addPath(process.cwd() + '/' + contentUri + '/nodejs/node_modules')
         }
     }
@@ -229,6 +240,8 @@ function getLayersforLambda(lambda) {
     let layerArray = []
     if (lambda.Properties.Layers) {
         for (var l in lambda.Properties.Layers) {
+            //To self - Doesn't run in our case, the only Layers are Globals for us
+            //Review - Linked to line 127
             let layerName = lambda.Properties.Layers[l]
             layerArray.push(this.resolveParameter(layerName))
         }
@@ -245,6 +258,7 @@ function getEnvironmentVariablesforLambda(lambda) {
     let lambdaVariables;
     let globalVariables;
     if (this.Globals && this.Globals.Function && this.Globals.Function.Environment.Variables) {
+        //To self - Again in our case we only have Global envvars
         globalVariables = this.Globals.Function.Environment.Variables
     }
     if (lambda.Properties.Environment && lambda.Properties.Environment.Variables) {
@@ -261,6 +275,7 @@ function getEnvironmentVariablesforLambda(lambda) {
     }
     if (globalVariables) {
         for (var v in globalVariables) {
+            //Review - I'd like to go over the format of globalVariables, I thought globalVariables[0] would be {MAP_TEST: 'X'} (where X is the parsed string for the !findInMap)
             let variablesName = globalVariables[v]
             let variable = {}
             variable[v] = this.resolveParameter(variablesName)
@@ -291,6 +306,7 @@ function processToYaml(input) {
     return inputString
 }
 function resolveParameter(reference) {
+    //Review - I don't understand why parameterOverrides[reference._____Ref] would exist
     if (typeof (reference) == 'object') {
         if (reference._____Ref) {
             if (this.parameterOverrides[reference._____Ref]) {

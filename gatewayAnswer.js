@@ -21,9 +21,14 @@ var answerFunction = async function (request, response) {
     }
     var _path = request.url
     var _queryString = request.url
+    //To self - youtube.com/results?search_query=sasha+shulgin
     if (_path.indexOf('?') > -1) {
         _path = _path.substring(0, _path.indexOf('?'))
+        //"youtube.com/results"+"?search_query=sasha+shulgin"
         _queryString = _queryString.substring(_queryString.indexOf('?') + 1)
+        //?search_query=sasha+shulgin => search_query=sasha+shulgin
+        //AFAIK, technically this would return search_query=["sasha+shulgin"]
+        //(There might be a rule making this a multiqsp with the +, in which case it'd return search_query=["sasha", "shulgin"])
     }
     multiQueryStringParameters = querystring.parse(_queryString)
     if (multiQueryStringParameters) {
@@ -60,6 +65,7 @@ var answerFunction = async function (request, response) {
             contentType = event.headers['Content-Type']
         }
         if (contentType && contentType.toLowerCase().indexOf('multipart/form-data') == 0) {
+            //Review - So is the reason we're Base64 encoding because it's going to be a file?
             event.body = Buffer.from(contents).toString('base64');
             event.isBase64Encoded = true
         } else {

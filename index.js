@@ -15,6 +15,7 @@ function startServer() {
         if (process.argv[i] == '--port') {
             _port = process.argv[i * 1 + 1]
         } else if (process.argv[i] == '--template') {
+            //Side note, --template-file is supported by Cloudformation
             templateName = process.argv[i * 1 + 1]
         } else if (process.argv[i] == '--parameter-overrides') {
             let _string = process.argv[i * 1 + 1]
@@ -34,6 +35,7 @@ function startServer() {
         } else if (process.argv[i] == '--wsport') {
             _wsport = process.argv[i * 1 + 1]
         } else if (process.argv[i] == '--skipdb') {
+            //Review - We assign a value to _skipDb, but we never read it and skip any db creation if the argument is present. Why? Also, what's up with indexOf('t')?
             _skipDb = process.argv[i * 1 + 1].toLowerCase().indexOf('t')>-1;
         }
     }
@@ -45,10 +47,13 @@ function startServer() {
                 createTable(stack, resource)
             }
         } else if (resource.Type == 'AWS::Serverless::SimpleTable') {
+            //To self - SimpleTable is just a DDB table where only a primary key is needed (simple, fast)
             if (parameterOverrides.DynamoDbEndpoint && !_skipDb) {
                 let primaryKey = resource.Properties.PrimaryKey
                 resource.Properties.KeySchema = []
                 resource.Properties.KeySchema.push({ AttributeName: primaryKey.Name, KeyType: 'HASH' })
+                //To self - See documentation for details, but we're doing this because SimpleTable can't have a KeySchema or AttributeDefinitions in the template
+                //as opposed to a DynamoDB::Table resource.
                 resource.Properties.AttributeDefinitions = []
                 resource.Properties.AttributeDefinitions.push({ AttributeName: primaryKey.Name, AttributeType: primaryKey.Type.charAt(0) })
                 delete resource.Properties.PrimaryKey
@@ -66,16 +71,21 @@ function startServer() {
         }
     }
     let answerFunction = getAnswerFunction(stack);
+    //To self - getAnswerFunction (in gatewayAnswer) returns its local function, answerFunction (named identically here).
     var server = http.createServer(answerFunction);
+    //To self - And then we pass that intelligence to the server!
     //TODO support multipled instances of AWS::ApiGateway::Api
     server.listen(_port);
     console.log(`Server listening on port ${_port}`);
 
 }
 function createTable(stack, resource) {
+    //To self - Deleting AWS-specific properties
     delete resource.Properties.BillingMode;
     delete resource.Properties.PointInTimeRecoverySpecification;
     const { execSync } = require('child_process')
+    //To self - I'm surprised we need to use this as I assumed it'd be a given we can use nodejs modules,
+    //plus child_process looks to be too low-level to need to be specifically required
     resource.Properties.TableName = stack.resolveParameter(resource.Properties.TableName)
     fs.writeFileSync(resource.Properties.TableName + '.JSON', JSON.stringify(resource.Properties))
     try {
