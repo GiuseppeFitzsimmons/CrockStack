@@ -1,6 +1,6 @@
 const querystring = require('querystring');
 var moduleAlias = require('module-alias')
-
+//comment
 var stack
 
 
@@ -29,6 +29,7 @@ var answerFunction = async function (request, response) {
         //?search_query=sasha+shulgin => search_query=sasha+shulgin
         //AFAIK, technically this would return search_query=["sasha+shulgin"]
         //(There might be a rule making this a multiqsp with the +, in which case it'd return search_query=["sasha", "shulgin"])
+        //"youtube.com/results"+"?search_query=sasha&search_query=shulgin"
     }
     multiQueryStringParameters = querystring.parse(_queryString)
     if (multiQueryStringParameters) {

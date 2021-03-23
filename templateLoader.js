@@ -124,7 +124,7 @@ function prepareLambdaForExecution(lambda) {
     if (layers) {
         for (var l in layers) {
             let layer = layers[l];
-            //Review - What is the format of what's returned by getLayersforLambda? I didn't think layers[l] would be a string.
+            //c - What is the format of what's returned by getLayersforLambda? I didn't think layers[l] would be a string.
             if (typeof layer==='string') {
                 layer=this.Resources[layer];
             }
